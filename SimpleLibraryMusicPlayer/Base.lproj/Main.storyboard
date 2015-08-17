@@ -44,7 +44,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist Name | Album Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FWh-wf-f2m">
-                                                    <rect key="frame" x="94" y="34" width="498" height="20"/>
+                                                    <rect key="frame" x="90" y="34" width="502" height="20"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="20" id="5UJ-aS-z3O"/>
                                                     </constraints>
@@ -61,24 +61,47 @@
                                                     <color key="textColor" red="0.26666666666666666" green="0.26666666666666666" blue="0.26666666666666666" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="DRM" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7iN-bV-bOu">
+                                                    <rect key="frame" x="118" y="56" width="38" height="20"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="20" id="kUn-3O-OT9"/>
+                                                        <constraint firstAttribute="width" constant="38" id="mzg-qX-svu"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" weight="light" pointSize="14"/>
+                                                    <color key="textColor" red="1" green="0.039215686274509803" blue="0.039215686274509803" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView hidden="YES" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="cloud" translatesAutoresizingMaskIntoConstraints="NO" id="pXd-Cl-Xzi">
+                                                    <rect key="frame" x="90" y="56" width="20" height="20"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="20" id="B0s-a9-lFK"/>
+                                                        <constraint firstAttribute="width" constant="20" id="Bd0-7d-9K0"/>
+                                                    </constraints>
+                                                </imageView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="FWh-wf-f2m" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="12" id="7G2-Zv-88J"/>
+                                                <constraint firstItem="FWh-wf-f2m" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="8" id="7G2-Zv-88J"/>
+                                                <constraint firstAttribute="bottom" secondItem="7iN-bV-bOu" secondAttribute="bottom" constant="8" id="8ip-NP-hqf"/>
                                                 <constraint firstItem="qu6-VK-vtm" firstAttribute="leading" secondItem="hwv-vl-I3V" secondAttribute="leading" constant="2" id="JeV-ER-2hP"/>
                                                 <constraint firstAttribute="trailing" secondItem="z9U-Fe-c8a" secondAttribute="trailing" constant="8" id="LcN-yd-ECd"/>
                                                 <constraint firstItem="qu6-VK-vtm" firstAttribute="top" secondItem="hwv-vl-I3V" secondAttribute="top" constant="2" id="PVH-J8-ncv"/>
                                                 <constraint firstItem="z9U-Fe-c8a" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="8" id="Qr3-pj-rhL"/>
                                                 <constraint firstItem="w5d-3g-jdQ" firstAttribute="top" secondItem="hwv-vl-I3V" secondAttribute="top" constant="8" id="RRL-hj-73V"/>
+                                                <constraint firstAttribute="bottom" secondItem="pXd-Cl-Xzi" secondAttribute="bottom" constant="8" id="YhD-Oa-Grn"/>
                                                 <constraint firstAttribute="trailing" secondItem="w5d-3g-jdQ" secondAttribute="trailing" constant="8" id="Z1k-oX-q5o"/>
                                                 <constraint firstAttribute="trailing" secondItem="FWh-wf-f2m" secondAttribute="trailing" constant="8" id="cZa-ZK-2rR"/>
+                                                <constraint firstItem="7iN-bV-bOu" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="36" id="eXb-pH-Awi"/>
                                                 <constraint firstAttribute="bottom" secondItem="z9U-Fe-c8a" secondAttribute="bottom" constant="8" id="fTl-wZ-6kR"/>
                                                 <constraint firstItem="FWh-wf-f2m" firstAttribute="top" secondItem="w5d-3g-jdQ" secondAttribute="bottom" constant="4" id="fxx-Zv-UK0"/>
+                                                <constraint firstItem="pXd-Cl-Xzi" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="8" id="gC5-aq-aSn"/>
                                                 <constraint firstItem="w5d-3g-jdQ" firstAttribute="leading" secondItem="qu6-VK-vtm" secondAttribute="trailing" constant="8" id="kDZ-20-Shp"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="artistNameAlbumNameLabel" destination="FWh-wf-f2m" id="Cqc-EX-6lZ"/>
                                             <outlet property="artworkImageView" destination="qu6-VK-vtm" id="T8b-DT-Wf5"/>
+                                            <outlet property="cloudImageView" destination="pXd-Cl-Xzi" id="VqL-dv-kM4"/>
+                                            <outlet property="drmLabel" destination="7iN-bV-bOu" id="4vw-HR-GN8"/>
                                             <outlet property="timeLabel" destination="z9U-Fe-c8a" id="mcT-4o-p5X"/>
                                             <outlet property="trackTitle" destination="w5d-3g-jdQ" id="r4f-SZ-5Mu"/>
                                         </connections>
@@ -156,4 +179,7 @@
             </objects>
         </scene>
     </scenes>
+    <resources>
+        <image name="cloud" width="20" height="20"/>
+    </resources>
 </document>

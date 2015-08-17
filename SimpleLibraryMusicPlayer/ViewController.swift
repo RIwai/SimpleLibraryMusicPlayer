@@ -98,11 +98,23 @@ extension ViewController: UITableViewDataSource {
             } else {
                 trackCell.artworkImageView.image = nil
             }
+            
+            if mediaItem.cloudItem {
+                trackCell.cloudImageView.hidden = false
+            } else {
+                trackCell.cloudImageView.hidden = true
+                if let assetURL = mediaItem.assetURL {
+                    trackCell.drmLabel.hidden = true
+                } else {
+                    trackCell.drmLabel.hidden = false
+                }
+            }
         } else {
             trackCell.trackTitle.text = "-"
             trackCell.artistNameAlbumNameLabel.text = "-"
             trackCell.timeLabel.text = "-:-"
             trackCell.artworkImageView.image = nil
+            trackCell.drmLabel.hidden = true
         }
         
         return trackCell
@@ -117,9 +129,17 @@ extension ViewController: UITableViewDelegate {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         if let mediaItem = self.mediaItemWithIndex(indexPath.row) {
-            let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
-            playerViewController.mediaItem = mediaItem
-            self.presentViewController(playerViewController, animated: true, completion: nil)
+            if mediaItem.cloudItem == false {
+                if let assetURL = mediaItem.assetURL {
+                    let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
+                    playerViewController.mediaItem = mediaItem
+                    self.presentViewController(playerViewController, animated: true, completion: nil)
+                } else {
+                    // Could not play DRM protected file
+                }
+            } else {
+                // Could not play iClound contents
+            }
         }
         
     }
