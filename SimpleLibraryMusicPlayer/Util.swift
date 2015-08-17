@@ -13,6 +13,10 @@ class Util: NSObject {
     class func timeString(secondTimes: NSTimeInterval?) -> String {
         
         if let unwrappedTime = secondTimes {
+            if isnan(unwrappedTime) {
+                return "00:00"
+            }
+            
             let min = Int(unwrappedTime / 60)
             let sec = Int(unwrappedTime % 60)
             
