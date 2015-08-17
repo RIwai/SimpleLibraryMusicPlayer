@@ -13,22 +13,54 @@ class ViewController: UIViewController {
     
     // MARK: - Outlet property
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var includeiCloudTracksSwitch: UISwitch!
 
     // MARK: Private property
     private var mediaQuery: MPMediaQuery? = nil
+    private let includeiCloudTracksKey = "includeiCloudTracks"
 
     // MARK: - Override methods
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Set value
+        self.includeiCloudTracksSwitch.setOn(NSUserDefaults.standardUserDefaults().boolForKey(self.includeiCloudTracksKey), animated: true)
+        
         // Get Media
-        self.mediaQuery = MPMediaQuery.artistsQuery()
+        self.updateMediaQuery()
         
         // Set top inset
-        self.tableView.contentInset.top = 20
+        self.tableView.contentInset.top = 64
     }
 
+    // MARK:
+    @IBAction func includeiCloudSwitchValueChanged(sender: AnyObject) {
+        self.updateMediaQuery()
+        
+        NSUserDefaults.standardUserDefaults().setBool(self.includeiCloudTracksSwitch.on, forKey: self.includeiCloudTracksKey)
+        NSUserDefaults.standardUserDefaults().synchronize()
+    }
+
+    
     // MARK: Private methods
+    private func updateMediaQuery() {
+        if self.includeiCloudTracksSwitch.on {
+            self.mediaQuery = MPMediaQuery()
+            // Only Media type music
+            self.mediaQuery?.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
+            // Include iCloud item
+            self.mediaQuery?.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
+        } else {
+            self.mediaQuery = MPMediaQuery()
+            // Only Media type music
+            self.mediaQuery?.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
+            // Exclude iCloud item
+            self.mediaQuery?.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
+        }
+        
+        self.tableView.reloadData()
+    }
+    
     private func mediaItemWithIndex(index: Int) -> MPMediaItem? {
         if let items = self.mediaQuery?.items {
             if items.count > index {
