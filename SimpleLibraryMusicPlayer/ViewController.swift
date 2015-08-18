@@ -103,10 +103,10 @@ extension ViewController: UITableViewDataSource {
                 trackCell.cloudImageView.hidden = false
             } else {
                 trackCell.cloudImageView.hidden = true
-                if let assetURL = mediaItem.assetURL {
-                    trackCell.drmLabel.hidden = true
-                } else {
+                if mediaItem.assetURL == nil {
                     trackCell.drmLabel.hidden = false
+                } else {
+                    trackCell.drmLabel.hidden = true
                 }
             }
         } else {
@@ -130,7 +130,7 @@ extension ViewController: UITableViewDelegate {
         
         if let mediaItem = self.mediaItemWithIndex(indexPath.row) {
             if mediaItem.cloudItem == false {
-                if let assetURL = mediaItem.assetURL {
+                if mediaItem.assetURL != nil {
                     let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
                     playerViewController.mediaItem = mediaItem
                     self.presentViewController(playerViewController, animated: true, completion: nil)

@@ -126,14 +126,12 @@ class PlayerViewController: UIViewController {
 
     private func playbackTimeTimer() {
         if self.player.playbackState == .Playing {
-            if let timer = self.timer {
-                // Do nothing
-            } else {
+            if self.timer == nil {
                 self.timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
             }
         } else {
             if let timer = self.timer {
-                self.timer?.invalidate()
+                timer.invalidate()
                 self.timer = nil
             } else {
                 // Do nothing
