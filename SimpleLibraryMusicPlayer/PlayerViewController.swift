@@ -20,6 +20,7 @@ class PlayerViewController: UIViewController {
     @IBOutlet weak var currentTimeLabel: UILabel!
     @IBOutlet weak var playbackDurationTimeLabel: UILabel!
     @IBOutlet weak var playButton: UIButton!
+    @IBOutlet weak var lylicsTextView: UITextView!
     
     // MARK: Internal property
     var mediaItem: MPMediaItem? = nil
@@ -95,6 +96,12 @@ class PlayerViewController: UIViewController {
         self.trackTitleLabel.text = self.mediaItem?.title ?? "-"
         self.artistNameLabel.text = self.mediaItem?.artist ?? "-"
         self.albumTitleLabel.text = self.mediaItem?.albumTitle ?? "-"
+        if let lyrics = self.mediaItem?.lyrics {
+            if !lyrics.isEmpty {
+                self.lylicsTextView.hidden = false
+                self.lylicsTextView.text = lyrics
+            }
+        }
         
         self.currentTimeLabel.text = "00:00"
         self.playbackDurationTimeLabel.text = Util.timeString(self.mediaItem?.playbackDuration ?? 0)

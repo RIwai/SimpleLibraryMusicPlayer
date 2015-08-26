@@ -6,13 +6,14 @@
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PlayerViewController" customModule="TestLocalMusic" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PlayerViewController" customModule="SimpleLibraryMusicPlayer" customModuleProvider="target">
             <connections>
                 <outlet property="albumTitleLabel" destination="05t-hk-LfW" id="stY-sU-R4d"/>
                 <outlet property="artistNameLabel" destination="4rP-yR-ezD" id="se0-8J-6fg"/>
                 <outlet property="artworkImageView" destination="UKx-aY-b6Q" id="E6K-fu-nSE"/>
                 <outlet property="closeButton" destination="KWN-8E-nZ0" id="Hyk-b6-PEe"/>
                 <outlet property="currentTimeLabel" destination="Fcx-6c-tNs" id="2rh-AB-WCZ"/>
+                <outlet property="lylicsTextView" destination="Brc-cl-RPh" id="9pm-je-ICf"/>
                 <outlet property="playButton" destination="fLr-cW-44s" id="zbz-4d-RCY"/>
                 <outlet property="playbackDurationTimeLabel" destination="Gtl-HK-Hcv" id="Kjt-NM-MiT"/>
                 <outlet property="trackTitleLabel" destination="uQ9-A4-YVC" id="jpK-Wz-2pn"/>
@@ -36,8 +37,8 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="18" id="xLm-a1-gDa"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                    <color key="textColor" red="0.14117647058823529" green="0.14117647058823529" blue="0.14117647058823529" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4rP-yR-ezD">
@@ -46,8 +47,8 @@
                         <constraint firstAttribute="height" constant="18" id="B3q-vQ-clx"/>
                         <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="14" id="eTi-xI-L1A"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" red="0.26666666666666666" green="0.26666666666666666" blue="0.26666666666666666" alpha="1" colorSpace="calibratedRGB"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" red="0.28235294117647058" green="0.28235294117647058" blue="0.28235294117647058" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Album Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="05t-hk-LfW">
@@ -56,8 +57,8 @@
                         <constraint firstAttribute="height" constant="18" id="2BS-k0-3pf"/>
                         <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="14" id="VAb-JG-Nrd"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" red="0.2666666667" green="0.2666666667" blue="0.2666666667" alpha="1" colorSpace="calibratedRGB"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" red="0.28235294117647058" green="0.28235294117647058" blue="0.28235294117647058" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fLr-cW-44s">
@@ -93,7 +94,7 @@
                         <constraint firstAttribute="height" constant="20" id="osF-cH-XBq"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="textColor" red="0.28235294117647058" green="0.28235294117647058" blue="0.28235294117647058" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gtl-HK-Hcv">
@@ -103,7 +104,7 @@
                         <constraint firstAttribute="width" constant="100" id="87K-yg-a2A"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="textColor" red="0.28235294117647058" green="0.28235294117647058" blue="0.28235294117647058" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fcx-6c-tNs">
@@ -113,12 +114,19 @@
                         <constraint firstAttribute="width" constant="100" id="sD5-RD-RhT"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="textColor" red="0.28235294117647058" green="0.28235294117647058" blue="0.28235294117647058" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <textView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Brc-cl-RPh">
+                    <rect key="frame" x="8" y="458" width="584" height="44"/>
+                    <color key="backgroundColor" red="1" green="0.97254901960784312" blue="0.97254901960784312" alpha="1" colorSpace="calibratedRGB"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
+                <constraint firstItem="Brc-cl-RPh" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="3CO-xW-E3f"/>
                 <constraint firstAttribute="centerX" secondItem="fLr-cW-44s" secondAttribute="centerX" priority="750" id="4Dk-3T-uBn"/>
                 <constraint firstItem="05t-hk-LfW" firstAttribute="top" secondItem="4rP-yR-ezD" secondAttribute="bottom" constant="4" id="9Oc-c4-jMZ"/>
                 <constraint firstAttribute="centerX" secondItem="UKx-aY-b6Q" secondAttribute="centerX" priority="750" id="9Xh-cg-dZu"/>
@@ -134,10 +142,13 @@
                 <constraint firstItem="KWN-8E-nZ0" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="aJy-Kd-NGi"/>
                 <constraint firstItem="oAD-42-1gc" firstAttribute="leading" secondItem="Fcx-6c-tNs" secondAttribute="trailing" id="bV9-O1-JGj"/>
                 <constraint firstAttribute="centerX" secondItem="oAD-42-1gc" secondAttribute="centerX" priority="750" id="h10-ff-dhM"/>
+                <constraint firstItem="Brc-cl-RPh" firstAttribute="top" secondItem="05t-hk-LfW" secondAttribute="bottom" constant="8" id="jef-Jz-6eR"/>
                 <constraint firstItem="UKx-aY-b6Q" firstAttribute="width" secondItem="uQ9-A4-YVC" secondAttribute="width" multiplier="0.6" priority="750" id="sBu-qC-zZC"/>
                 <constraint firstItem="05t-hk-LfW" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="skF-4u-dfN"/>
                 <constraint firstItem="4rP-yR-ezD" firstAttribute="top" secondItem="uQ9-A4-YVC" secondAttribute="bottom" constant="4" id="sqz-vS-EMg"/>
+                <constraint firstItem="Fcx-6c-tNs" firstAttribute="top" secondItem="Brc-cl-RPh" secondAttribute="bottom" constant="8" id="tBx-JJ-LkH"/>
                 <constraint firstItem="KWN-8E-nZ0" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="20" id="tMc-6t-aBq"/>
+                <constraint firstAttribute="trailing" secondItem="Brc-cl-RPh" secondAttribute="trailing" constant="8" id="uQK-NX-ypr"/>
                 <constraint firstItem="fLr-cW-44s" firstAttribute="top" secondItem="oAD-42-1gc" secondAttribute="bottom" constant="12" id="usZ-PV-bk8"/>
                 <constraint firstAttribute="trailing" secondItem="05t-hk-LfW" secondAttribute="trailing" constant="8" id="w2g-1i-cjX"/>
                 <constraint firstAttribute="trailing" secondItem="uQ9-A4-YVC" secondAttribute="trailing" constant="8" id="xKu-BC-dgO"/>

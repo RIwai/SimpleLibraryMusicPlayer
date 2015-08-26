@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Uq5-gw-tmx">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="6fx-zx-295">
+            <objects>
+                <navigationController id="Uq5-gw-tmx" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="V2a-WX-TTW">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="iUV-42-TI3" kind="relationship" relationship="rootViewController" id="tHr-W3-2Yq"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NXi-tB-IP0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="136" y="356"/>
+        </scene>
+        <!--Select View Controller-->
+        <scene sceneID="rgF-92-oIe">
+            <objects>
+                <viewController id="iUV-42-TI3" customClass="SelectViewController" customModule="SimpleLibraryMusicPlayer" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Kbi-47-XdC"/>
+                        <viewControllerLayoutGuide type="bottom" id="0Lh-vl-KEX"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Cxe-d4-6wl">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="50" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="y4m-ti-UOf">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NormalCell" textLabel="wx9-cS-dOi" style="IBUITableViewCellStyleDefault" id="9Mj-5A-eb3">
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="9Mj-5A-eb3" id="2ns-L5-SfM">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="wx9-cS-dOi">
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                    <color key="textColor" red="0.14117647058823529" green="0.14117647058823529" blue="0.14117647058823529" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="iUV-42-TI3" id="K99-x6-Oh7"/>
+                                    <outlet property="delegate" destination="iUV-42-TI3" id="ErT-ee-Hr9"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="0Lh-vl-KEX" firstAttribute="top" secondItem="y4m-ti-UOf" secondAttribute="bottom" id="3g2-Rr-6kM"/>
+                            <constraint firstItem="y4m-ti-UOf" firstAttribute="top" secondItem="Cxe-d4-6wl" secondAttribute="top" id="HCo-E1-xYI"/>
+                            <constraint firstItem="y4m-ti-UOf" firstAttribute="leading" secondItem="Cxe-d4-6wl" secondAttribute="leading" id="Wvg-uI-4Wv"/>
+                            <constraint firstAttribute="trailing" secondItem="y4m-ti-UOf" secondAttribute="trailing" id="qTm-Qd-Gdr"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="ZZU-Lv-UhA"/>
+                    <connections>
+                        <outlet property="tableView" destination="y4m-ti-UOf" id="MqR-vK-iLc"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cDu-6P-Vo0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="863" y="443"/>
+        </scene>
+    </scenes>
+</document>
