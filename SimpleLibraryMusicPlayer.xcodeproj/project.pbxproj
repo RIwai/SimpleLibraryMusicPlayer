@@ -27,6 +27,7 @@
 		CA14065D1B8DCE9900D96D65 /* ArtistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA14065C1B8DCE9900D96D65 /* ArtistViewController.swift */; };
 		CA14065F1B8DCEA600D96D65 /* ArtistViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */; };
 		CA1406611B8DCECD00D96D65 /* ArtistCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1406601B8DCECD00D96D65 /* ArtistCell.swift */; };
+		CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		CA14065C1B8DCE9900D96D65 /* ArtistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistViewController.swift; sourceTree = "<group>"; };
 		CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ArtistViewController.storyboard; sourceTree = "<group>"; };
 		CA1406601B8DCECD00D96D65 /* ArtistCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistCell.swift; sourceTree = "<group>"; };
+		CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackPlayAllCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */,
 				CA1406521B8DAF8900D96D65 /* TracksViewController.swift */,
 				CA07E45F1B816F7C00FB25B4 /* TrackCell.swift */,
+				CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */,
 				CA1406541B8DAF9500D96D65 /* TracksViewController.storyboard */,
 				CA07E4611B81800B00FB25B4 /* PlayerViewController.swift */,
 				CA07E4621B81800B00FB25B4 /* PlayerViewController.xib */,
@@ -148,6 +151,11 @@
 				TargetAttributes = {
 					CA07E4391B8165BC00FB25B4 = {
 						CreatedOnToolsVersion = 6.4;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -201,6 +209,7 @@
 				CA07E4661B81A5AF00FB25B4 /* Util.swift in Sources */,
 				CA07E4401B8165BC00FB25B4 /* AppDelegate.swift in Sources */,
 				CA1406491B8D98BF00D96D65 /* SelectViewController.swift in Sources */,
+				CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */,
 				CA14065B1B8DC01E00D96D65 /* AlbumCell.swift in Sources */,
 				CA07E4601B816F7C00FB25B4 /* TrackCell.swift in Sources */,
 				CA14065D1B8DCE9900D96D65 /* ArtistViewController.swift in Sources */,

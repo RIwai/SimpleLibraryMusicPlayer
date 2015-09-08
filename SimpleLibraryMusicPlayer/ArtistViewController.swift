@@ -27,6 +27,7 @@ class ArtistViewController: UIViewController {
         query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
         query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
+
         self.artists = query.collections as? [MPMediaItemCollection] ?? []
     }
 }

@@ -20,10 +20,15 @@ class PlayerViewController: UIViewController {
     @IBOutlet weak var currentTimeLabel: UILabel!
     @IBOutlet weak var playbackDurationTimeLabel: UILabel!
     @IBOutlet weak var playButton: UIButton!
+    @IBOutlet weak var skipButton: UIButton!
+    @IBOutlet weak var prevButton: UIButton!
+    @IBOutlet weak var shuffleSwitch: UISwitch!
+    @IBOutlet weak var repeatSwitch: UISwitch!
+    @IBOutlet weak var seekSlider: UISlider!
     @IBOutlet weak var lylicsTextView: UITextView!
     
     // MARK: Internal property
-    var mediaItem: MPMediaItem? = nil
+    var mediaItems: [MPMediaItem]? = nil
     
     // MARK: Private property
     private let player: MPMusicPlayerController = MPMusicPlayerController.applicationMusicPlayer()
@@ -39,14 +44,18 @@ class PlayerViewController: UIViewController {
         self.artworkImageView.layer.cornerRadius = 2.0
         self.artworkImageView.clipsToBounds = true
 
-        self.setupUIPartsWithMediaItem()
-        
         // Set notifications
         self.addPlayerObserver()
 
+        // Mode
+        self.repeatSwitch.on = true
+        self.player.repeatMode = MPMusicRepeatMode.All
+        self.shuffleSwitch.on = false
+        self.player.shuffleMode = MPMusicShuffleMode.Off
+        
         // Player
-        if let item = self.mediaItem {
-            self.player.setQueueWithItemCollection(MPMediaItemCollection(items: [item]))
+        if let items = self.mediaItems {
+            self.player.setQueueWithItemCollection(MPMediaItemCollection(items: items))
             self.player.play()
         }
         
@@ -66,6 +75,26 @@ class PlayerViewController: UIViewController {
         }
     }
 
+    @IBAction func tapSkipButton(sender: AnyObject) {
+        self.player.skipToNextItem()
+    }
+
+    @IBAction func tapPrevButton(sender: AnyObject) {
+        self.player.skipToPreviousItem()
+    }
+    
+    @IBAction func seekSliderValueChange(sender: AnyObject) {
+        self.player.currentPlaybackTime = NSTimeInterval(self.seekSlider.value)
+    }
+
+    @IBAction func repatSwitchValueChange(sender: AnyObject) {
+        self.player.repeatMode = self.repeatSwitch.on ? MPMusicRepeatMode.All : MPMusicRepeatMode.None
+    }
+
+    @IBAction func suffleSwitchValueChange(sender: AnyObject) {
+        self.player.shuffleMode = self.shuffleSwitch.on ? MPMusicShuffleMode.Songs : MPMusicShuffleMode.Off
+    }
+    
     // MARK: Player notification handler
     func playbackStatusDidChange(notification: NSNotification) {
         self.togglePlayButton()
@@ -74,29 +103,29 @@ class PlayerViewController: UIViewController {
 
     func playingItemDidChange(notification: NSNotification) {
         if let currentMediaItem = self.player.nowPlayingItem {
-            self.mediaItem = currentMediaItem
-            self.setupUIPartsWithMediaItem()
+            self.setupUIPartsWithMediaItem(currentMediaItem)
         }
     }
 
     // MARK: Timer method
     func playbackTimer() {
         self.currentTimeLabel.text = Util.timeString(self.player.currentPlaybackTime)
+        self.seekSlider.setValue(Float(self.player.currentPlaybackTime), animated: true)
     }
 
     // MARK: Private methods
-    private func setupUIPartsWithMediaItem() {
-        if let artwork = self.mediaItem?.artwork {
+    private func setupUIPartsWithMediaItem(meidaItem: MPMediaItem) {
+        if let artwork = meidaItem.artwork {
             let scale = UIScreen.mainScreen().scale
             self.artworkImageView.image = artwork.imageWithSize(CGSizeMake(200 * scale, 200 * scale))
         } else {
             self.artworkImageView.image = nil
         }
         
-        self.trackTitleLabel.text = self.mediaItem?.title ?? "-"
-        self.artistNameLabel.text = self.mediaItem?.artist ?? "-"
-        self.albumTitleLabel.text = self.mediaItem?.albumTitle ?? "-"
-        if let lyrics = self.mediaItem?.lyrics {
+        self.trackTitleLabel.text = meidaItem.title ?? "-"
+        self.artistNameLabel.text = meidaItem.artist ?? "-"
+        self.albumTitleLabel.text = meidaItem.albumTitle ?? "-"
+        if let lyrics = meidaItem.lyrics {
             if !lyrics.isEmpty {
                 self.lylicsTextView.hidden = false
                 self.lylicsTextView.text = lyrics
@@ -104,7 +133,13 @@ class PlayerViewController: UIViewController {
         }
         
         self.currentTimeLabel.text = "00:00"
-        self.playbackDurationTimeLabel.text = Util.timeString(self.mediaItem?.playbackDuration ?? 0)
+        self.playbackDurationTimeLabel.text = Util.timeString(meidaItem.playbackDuration ?? 0)
+        
+        if meidaItem.playbackDuration != 0 && isnan(meidaItem.playbackDuration) == false {
+            // Set seek bar
+            self.seekSlider.maximumValue = Float(meidaItem.playbackDuration)
+            self.seekSlider.setValue(0, animated: true)
+        }
     }
     
     private func addPlayerObserver() {

@@ -23,11 +23,15 @@ class TracksViewController: UIViewController {
 extension TracksViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.tracks.count
+        return self.tracks.count + 1
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let mediaItem = self.tracks[indexPath.row]
+        if indexPath.row == 0 {
+            return self.tableView.dequeueReusableCellWithIdentifier("TrackPlayAllCell", forIndexPath: indexPath) as! TrackPlayAllCell
+        }
+        
+        let mediaItem = self.tracks[indexPath.row - 1]
         let trackCell = self.tableView.dequeueReusableCellWithIdentifier("TrackCell", forIndexPath: indexPath) as! TrackCell
         
         trackCell.trackTitle.text = mediaItem.title
@@ -63,7 +67,11 @@ extension TracksViewController: UITableViewDelegate {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
-        playerViewController.mediaItem = self.tracks[indexPath.row]
+        if indexPath.row == 0 {
+            playerViewController.mediaItems = self.tracks
+        } else {
+            playerViewController.mediaItems = [self.tracks[indexPath.row - 1]]
+        }
         self.presentViewController(playerViewController, animated: true, completion: nil)
    }
 }

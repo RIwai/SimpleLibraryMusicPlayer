@@ -42,7 +42,7 @@ enum SelectType: Int {
                 return UIStoryboard(name: "ArtistViewController", bundle: nil).instantiateInitialViewController() as? UIViewController
             case .Track:
                 if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
-                    let query = MPMediaQuery()
+                    let query = MPMediaQuery.songsQuery()
                     // Only Media type music
                     query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
                     // Include iCloud item

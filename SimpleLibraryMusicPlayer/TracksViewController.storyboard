@@ -107,6 +107,28 @@
                                             <outlet property="trackTitle" destination="Uy4-B9-K6Y" id="cIX-Yn-QP4"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrackPlayAllCell" id="JPA-eR-uai" customClass="TrackPlayAllCell" customModule="SimpleLibraryMusicPlayer" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="JPA-eR-uai" id="UPm-UO-Ecl">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Play All" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k4V-yV-bxo">
+                                                    <rect key="frame" x="0.0" y="0.0" width="600" height="80"/>
+                                                    <color key="backgroundColor" red="0.93333333330000001" green="0.86064189356198717" blue="0.8792868865194865" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="light" pointSize="28"/>
+                                                    <color key="textColor" red="0.26666666666666666" green="0.26666666666666666" blue="0.26666666666666666" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="k4V-yV-bxo" secondAttribute="trailing" id="6Ho-Ry-5nk"/>
+                                                <constraint firstItem="k4V-yV-bxo" firstAttribute="top" secondItem="UPm-UO-Ecl" secondAttribute="top" id="6M6-hK-I0L"/>
+                                                <constraint firstAttribute="bottom" secondItem="k4V-yV-bxo" secondAttribute="bottom" id="UFb-vC-jna"/>
+                                                <constraint firstItem="k4V-yV-bxo" firstAttribute="leading" secondItem="UPm-UO-Ecl" secondAttribute="leading" id="YNc-0S-Knz"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
                                 </prototypes>
                                 <connections>
                                     <outlet property="dataSource" destination="RP2-oN-Meo" id="Ajr-vu-o9y"/>
