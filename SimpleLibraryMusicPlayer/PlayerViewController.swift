@@ -8,6 +8,7 @@
 
 import UIKit
 import MediaPlayer
+import AVFoundation
 
 class PlayerViewController: UIViewController {
 
@@ -47,11 +48,15 @@ class PlayerViewController: UIViewController {
         // Set notifications
         self.addPlayerObserver()
 
+        // Add Remote Command
+        self.addRemoteCommand()
+        
         // Mode
         self.repeatSwitch.on = true
         self.player.repeatMode = MPMusicRepeatMode.All
         self.shuffleSwitch.on = false
         self.player.shuffleMode = MPMusicShuffleMode.Off
+        self.player.prepareToPlay()
         
         // Player
         if let items = self.mediaItems {
@@ -125,6 +130,8 @@ class PlayerViewController: UIViewController {
         self.trackTitleLabel.text = meidaItem.title ?? "-"
         self.artistNameLabel.text = meidaItem.artist ?? "-"
         self.albumTitleLabel.text = meidaItem.albumTitle ?? "-"
+        self.lylicsTextView.hidden = true
+        self.lylicsTextView.text = ""
         if let lyrics = meidaItem.lyrics {
             if !lyrics.isEmpty {
                 self.lylicsTextView.hidden = false
@@ -158,6 +165,14 @@ class PlayerViewController: UIViewController {
         self.player.beginGeneratingPlaybackNotifications()
     }
 
+    private func addRemoteCommand() {
+        MPRemoteCommandCenter.sharedCommandCenter().playCommand.addTarget(self, action: "remoteCommandPlay")
+        MPRemoteCommandCenter.sharedCommandCenter().pauseCommand.addTarget(self, action: "remoteCommandPause")
+        MPRemoteCommandCenter.sharedCommandCenter().stopCommand.addTarget(self, action: "remoteCommandStop")
+        MPRemoteCommandCenter.sharedCommandCenter().nextTrackCommand.addTarget(self, action: "remoteCommandNext")
+        MPRemoteCommandCenter.sharedCommandCenter().previousTrackCommand.addTarget(self, action: "remoteCommandPrevious")
+    }
+    
     private func togglePlayButton() {
         if self.player.playbackState == .Playing {
             self.playButton.setTitle("Stop", forState: UIControlState.Normal)
@@ -179,5 +194,26 @@ class PlayerViewController: UIViewController {
                 // Do nothing
             }
         }
+    }
+    
+    // MARK: - Remote Command Handler
+    func remoteCommandPlay() {
+        self.player.play()
+    }
+
+    func remoteCommandPause() {
+        self.player.pause()
+    }
+
+    func remoteCommandStop() {
+        self.player.stop()
+    }
+
+    func remoteCommandNext() {
+        self.player.skipToNextItem()
+    }
+
+    func remoteCommandPrevious() {
+        self.player.skipToPreviousItem()
     }
 }
