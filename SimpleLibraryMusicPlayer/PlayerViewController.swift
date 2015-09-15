@@ -28,12 +28,9 @@ class PlayerViewController: UIViewController {
     @IBOutlet weak var seekSlider: UISlider!
     @IBOutlet weak var lylicsTextView: UITextView!
     
-    // MARK: Internal property
-    var mediaItems: [MPMediaItem]? = nil
-    
     // MARK: Private property
-    private let player: MPMusicPlayerController = MPMusicPlayerController.applicationMusicPlayer()
     private var timer: NSTimer? = nil
+    private var sliderTracking: Bool = false
     
     // MARK: - Override methods
     override func viewDidLoad() {
@@ -44,78 +41,129 @@ class PlayerViewController: UIViewController {
         self.artworkImageView.layer.borderColor = UIColor.lightGrayColor().CGColor
         self.artworkImageView.layer.cornerRadius = 2.0
         self.artworkImageView.clipsToBounds = true
-
-        // Set notifications
-        self.addPlayerObserver()
-
-        // Add Remote Command
-        self.addRemoteCommand()
         
+        self.playButton.layer.borderWidth = 0.5
+        self.playButton.layer.borderColor = UIColor.darkGrayColor().CGColor
+        self.playButton.layer.cornerRadius = self.playButton.frame.height / 2
+        self.playButton.clipsToBounds = true
+
+        self.skipButton.layer.borderWidth = 0.5
+        self.skipButton.layer.borderColor = UIColor.darkGrayColor().CGColor
+        self.skipButton.layer.cornerRadius = self.skipButton.frame.height / 2
+        self.skipButton.clipsToBounds = true
+        
+        self.prevButton.layer.borderWidth = 0.5
+        self.prevButton.layer.borderColor = UIColor.darkGrayColor().CGColor
+        self.prevButton.layer.cornerRadius = self.prevButton.frame.height / 2
+        self.prevButton.clipsToBounds = true
+
+        self.lylicsTextView.layer.borderWidth = 0.5
+        self.lylicsTextView.layer.borderColor = UIColor.lightGrayColor().CGColor
+        
+        self.updateSkipButtons()
+
         // Mode
-        self.repeatSwitch.on = true
-        self.player.repeatMode = MPMusicRepeatMode.All
-        self.shuffleSwitch.on = false
-        self.player.shuffleMode = MPMusicShuffleMode.Off
-        self.player.prepareToPlay()
-        
+        self.repeatSwitch.on = LocalMusicPlayer.sharedPlayer.repeatStatus == .All
+        self.shuffleSwitch.on = LocalMusicPlayer.sharedPlayer.shuffleMode == .On
+
         // Player
-        if let items = self.mediaItems {
-            self.player.setQueueWithItemCollection(MPMediaItemCollection(items: items))
-            self.player.play()
-        }
+        self.addPlayerObserver()
+        self.playbackStatusDidChange()
+        self.playingItemDidChange()
+    }
+
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         
+        if let currentMediaItem = LocalMusicPlayer.sharedPlayer.currentTrack() {
+            self.setupUIPartsWithMediaItem(currentMediaItem)
+        } else {
+            // Close if no track in player
+            self.dismissViewControllerAnimated(true, completion: nil)
+        }
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        self.removePlayerObserver()
     }
     
     // MARK: Action methods
     @IBAction func tapCloseButton(sender: AnyObject) {
-        self.player.pause()
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
     @IBAction func tapPlayButton(sender: AnyObject) {
-        if self.player.playbackState == .Playing {
-            self.player.pause()
+        if LocalMusicPlayer.sharedPlayer.isPlaying {
+           LocalMusicPlayer.sharedPlayer.pause()
         } else {
-            self.player.play()
+            LocalMusicPlayer.sharedPlayer.play()
         }
     }
 
     @IBAction func tapSkipButton(sender: AnyObject) {
-        self.player.skipToNextItem()
+        LocalMusicPlayer.sharedPlayer.skipToNext()
     }
 
     @IBAction func tapPrevButton(sender: AnyObject) {
-        self.player.skipToPreviousItem()
+        LocalMusicPlayer.sharedPlayer.skipToPrevisu()
     }
     
     @IBAction func seekSliderValueChange(sender: AnyObject) {
-        self.player.currentPlaybackTime = NSTimeInterval(self.seekSlider.value)
+        if self.seekSlider.tracking {
+            // Stop Timer
+            if let timer = self.timer {
+                timer.invalidate()
+                self.timer = nil
+            }
+        } else {
+            if self.sliderTracking {
+                // Start Timer
+                self.playbackTimeTimer()
+                // Seek
+                LocalMusicPlayer.sharedPlayer.seekToTime(NSTimeInterval(self.seekSlider.value), completion: nil)
+                
+                self.sliderTracking = false
+            } else {
+                self.sliderTracking = true
+            }
+        }
+        // Label update
+        self.currentTimeLabel.text = Util.timeString(NSTimeInterval(self.seekSlider.value))
     }
 
     @IBAction func repatSwitchValueChange(sender: AnyObject) {
-        self.player.repeatMode = self.repeatSwitch.on ? MPMusicRepeatMode.All : MPMusicRepeatMode.None
+        LocalMusicPlayer.sharedPlayer.repeatStatus = self.repeatSwitch.on ? .All : .None
+        self.updateSkipButtons()
     }
 
     @IBAction func suffleSwitchValueChange(sender: AnyObject) {
-        self.player.shuffleMode = self.shuffleSwitch.on ? MPMusicShuffleMode.Songs : MPMusicShuffleMode.Off
+        LocalMusicPlayer.sharedPlayer.shuffleMode = self.shuffleSwitch.on ? .On : .Off
     }
     
     // MARK: Player notification handler
-    func playbackStatusDidChange(notification: NSNotification) {
+    func playbackStatusDidChange() {
         self.togglePlayButton()
         self.playbackTimeTimer()
     }
 
-    func playingItemDidChange(notification: NSNotification) {
-        if let currentMediaItem = self.player.nowPlayingItem {
+    func playingItemDidChange() {
+        if let currentMediaItem = LocalMusicPlayer.sharedPlayer.currentTrack() {
             self.setupUIPartsWithMediaItem(currentMediaItem)
+        }
+    }
+    
+    func noPlayableTrack() {
+        if LocalMusicPlayer.sharedPlayer.currentTrack() == nil {
+            self.dismissViewControllerAnimated(true, completion: nil)
         }
     }
 
     // MARK: Timer method
     func playbackTimer() {
-        self.currentTimeLabel.text = Util.timeString(self.player.currentPlaybackTime)
-        self.seekSlider.setValue(Float(self.player.currentPlaybackTime), animated: true)
+        self.currentTimeLabel.text = Util.timeString(LocalMusicPlayer.sharedPlayer.currentTime())
+        self.seekSlider.setValue(Float(LocalMusicPlayer.sharedPlayer.currentTime()), animated: true)
     }
 
     // MARK: Private methods
@@ -127,7 +175,7 @@ class PlayerViewController: UIViewController {
             self.artworkImageView.image = nil
         }
         
-        self.trackTitleLabel.text = meidaItem.title ?? "-"
+        self.trackTitleLabel.text = "[\(meidaItem.albumTrackNumber)]  \(meidaItem.title)"
         self.artistNameLabel.text = meidaItem.artist ?? "-"
         self.albumTitleLabel.text = meidaItem.albumTitle ?? "-"
         self.lylicsTextView.hidden = true
@@ -147,73 +195,53 @@ class PlayerViewController: UIViewController {
             self.seekSlider.maximumValue = Float(meidaItem.playbackDuration)
             self.seekSlider.setValue(0, animated: true)
         }
+
+        self.playbackTimer()
+        self.updateSkipButtons()
     }
     
     private func addPlayerObserver() {
-        let notificationCenter = NSNotificationCenter.defaultCenter()
-        
-        notificationCenter.addObserver(self,
-            selector: "playbackStatusDidChange:",
-            name: MPMusicPlayerControllerPlaybackStateDidChangeNotification,
-            object: nil)
-
-        notificationCenter.addObserver(self,
-            selector: "playingItemDidChange:",
-            name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification,
-            object: nil)
-
-        self.player.beginGeneratingPlaybackNotifications()
-    }
-
-    private func addRemoteCommand() {
-        MPRemoteCommandCenter.sharedCommandCenter().playCommand.addTarget(self, action: "remoteCommandPlay")
-        MPRemoteCommandCenter.sharedCommandCenter().pauseCommand.addTarget(self, action: "remoteCommandPause")
-        MPRemoteCommandCenter.sharedCommandCenter().stopCommand.addTarget(self, action: "remoteCommandStop")
-        MPRemoteCommandCenter.sharedCommandCenter().nextTrackCommand.addTarget(self, action: "remoteCommandNext")
-        MPRemoteCommandCenter.sharedCommandCenter().previousTrackCommand.addTarget(self, action: "remoteCommandPrevious")
+        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicStarted, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicPaused, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "playingItemDidChange", event: .LocalMusicTrackDidChange, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "noPlayableTrack", event: .LocalMusicNoPlayableTrack, object: nil)
     }
     
+    private func removePlayerObserver() {
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicStarted, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicPaused, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicTrackDidChange, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicNoPlayableTrack, object: nil)
+    }
+
     private func togglePlayButton() {
-        if self.player.playbackState == .Playing {
+        if LocalMusicPlayer.sharedPlayer.isPlaying {
             self.playButton.setTitle("Stop", forState: UIControlState.Normal)
         } else {
             self.playButton.setTitle("Play", forState: UIControlState.Normal)
         }
     }
 
+    private func updateSkipButtons() {
+        self.skipButton.enabled = LocalMusicPlayer.sharedPlayer.canSkipToNext()
+        self.prevButton.enabled = LocalMusicPlayer.sharedPlayer.canSkipToPrevious()
+    }
+    
     private func playbackTimeTimer() {
-        if self.player.playbackState == .Playing {
+        if LocalMusicPlayer.sharedPlayer.isPlaying {
             if self.timer == nil {
-                self.timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
+                self.timer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
             }
         } else {
             if let timer = self.timer {
                 timer.invalidate()
                 self.timer = nil
+                
+                self.playbackTimer()
             } else {
                 // Do nothing
             }
         }
     }
     
-    // MARK: - Remote Command Handler
-    func remoteCommandPlay() {
-        self.player.play()
-    }
-
-    func remoteCommandPause() {
-        self.player.pause()
-    }
-
-    func remoteCommandStop() {
-        self.player.stop()
-    }
-
-    func remoteCommandNext() {
-        self.player.skipToNextItem()
-    }
-
-    func remoteCommandPrevious() {
-        self.player.skipToPreviousItem()
-    }
 }

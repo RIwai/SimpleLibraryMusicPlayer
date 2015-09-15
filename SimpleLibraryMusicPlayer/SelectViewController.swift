@@ -46,8 +46,9 @@ enum SelectType: Int {
                     // Only Media type music
                     query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
                     // Include iCloud item
-                    query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
-                    tracksViewController.tracks = query.items as? [MPMediaItem] ?? []
+                    query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
+                    tracksViewController.collection = MPMediaItemCollection(items: query.items ?? [])
+                    tracksViewController.sourceType = .Track
                     
                     return tracksViewController as UIViewController
                 }
@@ -58,7 +59,7 @@ enum SelectType: Int {
 }
 
 // MARK: -
-class SelectViewController: UIViewController {
+class SelectViewController: BaseViewController {
     
     // MARK: - Outlet property
     @IBOutlet weak var tableView: UITableView!
