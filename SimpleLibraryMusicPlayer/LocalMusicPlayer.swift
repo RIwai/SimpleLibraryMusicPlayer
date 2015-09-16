@@ -382,7 +382,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     private func player() -> AVPlayer {
-        if let unwrapedPlayer = self.self.currentPlayer {
+        if let unwrapedPlayer = self.currentPlayer {
             return unwrapedPlayer
         }
         self.createPlayer(nil)
