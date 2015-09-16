@@ -612,21 +612,23 @@ class LocalMusicPlayer: NSObject {
     // MARK: - For AVAudioSessionInterruptionNotification
     func audioSessionInterruption(notification: NSNotification) {
         if let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber {
-            switch interruptionType.unsignedLongValue {
-            case AVAudioSessionInterruptionType.Began.rawValue:
-                if self.isPlaying {
-                    self.pause()
-                }
-                
-            case AVAudioSessionInterruptionType.Ended.rawValue:
-                if let interruptionOption = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber {
-                    if interruptionOption.unsignedLongValue == AVAudioSessionInterruptionOptions.OptionShouldResume.rawValue {
-                        self.play()
+            if let type = AVAudioSessionInterruptionType(rawValue: interruptionType.unsignedLongValue) {
+                switch type {
+                case .Began:
+                    if self.isPlaying {
+                        self.pause()
                     }
+                    
+                case .Ended:
+                    if let interruptionOption = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber {
+                        if interruptionOption.unsignedLongValue == AVAudioSessionInterruptionOptions.OptionShouldResume.rawValue {
+                            self.play()
+                        }
+                    }
+                    
+                default:
+                    break
                 }
-                
-            default:
-                break
             }
         }
     }
@@ -634,14 +636,16 @@ class LocalMusicPlayer: NSObject {
     // MARK: - For AVAudioSessionRouteChangeNotification
     func audioSessionRouteChange(notification: NSNotification) {
         if let changeReason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? NSNumber {
-            switch changeReason.unsignedLongValue {
-            case AVAudioSessionRouteChangeReason.OldDeviceUnavailable.rawValue:
-                if self.isPlaying {
-                    self.pause()
-                }
+            if let reason = AVAudioSessionRouteChangeReason(rawValue: changeReason.unsignedLongValue) {
+                switch reason {
+                case .OldDeviceUnavailable:
+                    if self.isPlaying {
+                        self.pause()
+                    }
 
-            default:
-                break
+                default:
+                    break
+                }
             }
         }
     }
