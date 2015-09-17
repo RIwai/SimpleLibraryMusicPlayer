@@ -28,6 +28,12 @@
 		CA14065F1B8DCEA600D96D65 /* ArtistViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */; };
 		CA1406611B8DCECD00D96D65 /* ArtistCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1406601B8DCECD00D96D65 /* ArtistCell.swift */; };
 		CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */; };
+		CABB848F1BA69BC5000352BE /* LocalMusicPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */; };
+		CABB84911BA6BAA2000352BE /* NSNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84901BA6BAA2000352BE /* NSNotificationCenter.swift */; };
+		CABB84931BA7B24D000352BE /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84921BA7B24D000352BE /* Array.swift */; };
+		CABB84951BA7E0E0000352BE /* PlayerButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */; };
+		CABB84971BA7E0EB000352BE /* PlayerButtonView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */; };
+		CABB84991BA7E7BC000352BE /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84981BA7E7BC000352BE /* BaseViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +60,12 @@
 		CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ArtistViewController.storyboard; sourceTree = "<group>"; };
 		CA1406601B8DCECD00D96D65 /* ArtistCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistCell.swift; sourceTree = "<group>"; };
 		CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackPlayAllCell.swift; sourceTree = "<group>"; };
+		CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalMusicPlayer.swift; sourceTree = "<group>"; };
+		CABB84901BA6BAA2000352BE /* NSNotificationCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSNotificationCenter.swift; sourceTree = "<group>"; };
+		CABB84921BA7B24D000352BE /* Array.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
+		CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerButtonView.swift; sourceTree = "<group>"; };
+		CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerButtonView.xib; sourceTree = "<group>"; };
+		CABB84981BA7E7BC000352BE /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				CA07E43F1B8165BC00FB25B4 /* AppDelegate.swift */,
+				CABB84981BA7E7BC000352BE /* BaseViewController.swift */,
 				CA1406481B8D98BF00D96D65 /* SelectViewController.swift */,
 				CA07E4431B8165BC00FB25B4 /* TopViewController.storyboard */,
 				CA14064C1B8DA81E00D96D65 /* PlaylistsViewController.swift */,
@@ -104,9 +117,14 @@
 				CA1406541B8DAF9500D96D65 /* TracksViewController.storyboard */,
 				CA07E4611B81800B00FB25B4 /* PlayerViewController.swift */,
 				CA07E4621B81800B00FB25B4 /* PlayerViewController.xib */,
+				CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */,
+				CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */,
+				CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */,
+				CABB84901BA6BAA2000352BE /* NSNotificationCenter.swift */,
+				CA07E4651B81A5AF00FB25B4 /* Util.swift */,
+				CABB84921BA7B24D000352BE /* Array.swift */,
 				CA07E4461B8165BC00FB25B4 /* Images.xcassets */,
 				CA07E4481B8165BC00FB25B4 /* LaunchScreen.xib */,
-				CA07E4651B81A5AF00FB25B4 /* Util.swift */,
 				CA07E43D1B8165BC00FB25B4 /* Supporting Files */,
 			);
 			path = SimpleLibraryMusicPlayer;
@@ -184,6 +202,7 @@
 			files = (
 				CA1406591B8DB8F700D96D65 /* AlbumsViewController.storyboard in Resources */,
 				CA14064F1B8DA82E00D96D65 /* PlaylistsViewController.storyboard in Resources */,
+				CABB84971BA7E0EB000352BE /* PlayerButtonView.xib in Resources */,
 				CA07E4451B8165BC00FB25B4 /* TopViewController.storyboard in Resources */,
 				CA07E4641B81800B00FB25B4 /* PlayerViewController.xib in Resources */,
 				CA14065F1B8DCEA600D96D65 /* ArtistViewController.storyboard in Resources */,
@@ -205,9 +224,14 @@
 				CA14064D1B8DA81E00D96D65 /* PlaylistsViewController.swift in Sources */,
 				CA1406531B8DAF8900D96D65 /* TracksViewController.swift in Sources */,
 				CA1406571B8DB8E200D96D65 /* AlbumsViewController.swift in Sources */,
+				CABB84991BA7E7BC000352BE /* BaseViewController.swift in Sources */,
+				CABB84931BA7B24D000352BE /* Array.swift in Sources */,
 				CA1406511B8DAD3500D96D65 /* PlaylistCell.swift in Sources */,
+				CABB84911BA6BAA2000352BE /* NSNotificationCenter.swift in Sources */,
 				CA07E4661B81A5AF00FB25B4 /* Util.swift in Sources */,
+				CABB84951BA7E0E0000352BE /* PlayerButtonView.swift in Sources */,
 				CA07E4401B8165BC00FB25B4 /* AppDelegate.swift in Sources */,
+				CABB848F1BA69BC5000352BE /* LocalMusicPlayer.swift in Sources */,
 				CA1406491B8D98BF00D96D65 /* SelectViewController.swift in Sources */,
 				CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */,
 				CA14065B1B8DC01E00D96D65 /* AlbumCell.swift in Sources */,

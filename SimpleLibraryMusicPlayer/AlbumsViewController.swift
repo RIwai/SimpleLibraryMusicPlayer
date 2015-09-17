@@ -9,7 +9,7 @@
 import UIKit
 import MediaPlayer
 
-class AlbumsViewController: UIViewController {
+class AlbumsViewController: BaseViewController {
     
     // MARK: - Outlet property
     @IBOutlet weak var tableView: UITableView!
@@ -26,10 +26,30 @@ class AlbumsViewController: UIViewController {
         // Only Media type music
         query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
         self.albums = query.collections as? [MPMediaItemCollection] ?? []
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.updateCells()
+    }
+    
+    override func updateCells() {
+        for cell in self.tableView.visibleCells() {
+            if let albumCell = cell as? AlbumCell {
+                if let indexPath = self.tableView.indexPathForCell(albumCell) {
+                    let album = self.albums[indexPath.row]
+                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(album) {
+                        albumCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+                    } else {
+                        albumCell.contentView.backgroundColor = UIColor.clearColor()
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -52,6 +72,12 @@ extension AlbumsViewController: UITableViewDataSource {
         } else {
             cell.artworkImageView.image = nil
         }
+
+        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(album) {
+            cell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+        } else {
+            cell.contentView.backgroundColor = UIColor.clearColor()
+        }
         
         return cell
     }
@@ -64,11 +90,10 @@ extension AlbumsViewController: UITableViewDelegate {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
-            if let items = self.albums[indexPath.row].items as? [MPMediaItem] {
-                tracksViewController.tracks = items
-                tracksViewController.title = self.albums[indexPath.row].representativeItem.albumTitle
-                self.navigationController?.pushViewController(tracksViewController, animated: true)
-            }
+            tracksViewController.collection = self.albums[indexPath.row]
+            tracksViewController.sourceType = .Album
+            tracksViewController.title = self.albums[indexPath.row].representativeItem.albumTitle
+            self.navigationController?.pushViewController(tracksViewController, animated: true)
         }
     }
 }

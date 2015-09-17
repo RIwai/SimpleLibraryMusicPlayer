@@ -9,7 +9,7 @@
 import UIKit
 import MediaPlayer
 
-class ArtistViewController: UIViewController {
+class ArtistViewController: BaseViewController {
     
     // MARK: - Outlet property
     @IBOutlet weak var tableView: UITableView!
@@ -26,9 +26,30 @@ class ArtistViewController: UIViewController {
         // Only Media type music
         query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
 
         self.artists = query.collections as? [MPMediaItemCollection] ?? []
+    }
+
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.updateCells()
+    }
+    
+    override func updateCells() {
+        for cell in self.tableView.visibleCells() {
+            if let artistCell = cell as? ArtistCell {
+                if let indexPath = self.tableView.indexPathForCell(artistCell) {
+                    let artist = self.artists[indexPath.row]
+                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(artist) {
+                        artistCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+                    } else {
+                        artistCell.contentView.backgroundColor = UIColor.clearColor()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -46,6 +67,12 @@ extension ArtistViewController: UITableViewDataSource {
         cell.artistNameLabel.text = artist.representativeItem.artist
         cell.trackCountLabel.text = "  \(artist.count) track(s)"
         
+        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(artist) {
+            cell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+        } else {
+            cell.contentView.backgroundColor = UIColor.clearColor()
+        }
+
         return cell
     }
 }
@@ -57,11 +84,10 @@ extension ArtistViewController: UITableViewDelegate {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
-            if let items = self.artists[indexPath.row].items as? [MPMediaItem] {
-                tracksViewController.tracks = items
-                tracksViewController.title = self.artists[indexPath.row].representativeItem.artist
-                self.navigationController?.pushViewController(tracksViewController, animated: true)
-            }
+            tracksViewController.collection = self.artists[indexPath.row]
+            tracksViewController.sourceType = .Artist
+            tracksViewController.title = self.artists[indexPath.row].representativeItem.artist
+            self.navigationController?.pushViewController(tracksViewController, animated: true)
         }
     }
 }

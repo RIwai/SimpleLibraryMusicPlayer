@@ -27,11 +27,4 @@ class Util: NSObject {
             return "00:00"
         }
     }
-    
-    class func avplayerItem(mediaItem: MPMediaItem) -> AVPlayerItem? {
-        if let assetURL = mediaItem.assetURL {
-            return AVPlayerItem(URL: assetURL)
-        }
-        return nil
-    }
 }

@@ -9,7 +9,7 @@
 import UIKit
 import MediaPlayer
 
-class PlaylistsViewController: UIViewController {
+class PlaylistsViewController: BaseViewController {
     
     // MARK: - Outlet property
     @IBOutlet weak var tableView: UITableView!
@@ -26,8 +26,29 @@ class PlaylistsViewController: UIViewController {
         // Only Media type music
         query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: true), forProperty: MPMediaItemPropertyIsCloudItem))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
         self.playlists = query.collections as? [MPMediaPlaylist] ?? []
+    }
+
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.updateCells()
+    }
+
+    override func updateCells() {
+        for cell in self.tableView.visibleCells() {
+            if let playlistCell = cell as? PlaylistCell {
+                if let indexPath = self.tableView.indexPathForCell(playlistCell) {
+                    let playlist = self.playlists[indexPath.row]
+                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(playlist) {
+                        playlistCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+                    } else {
+                        playlistCell.contentView.backgroundColor = UIColor.clearColor()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -39,11 +60,17 @@ extension PlaylistsViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let playList = self.playlists[indexPath.row]
+        let playlist = self.playlists[indexPath.row]
         let cell = self.tableView.dequeueReusableCellWithIdentifier("PlaylistCell", forIndexPath: indexPath) as! PlaylistCell
         
-        cell.titleLabel.text = playList.name
-        cell.descriptionLabel.text = "  \(playList.items.count) track(s)"
+        cell.titleLabel.text = playlist.name
+        cell.descriptionLabel.text = "  \(playlist.items.count) track(s)"
+        
+        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(playlist) {
+            cell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
+        } else {
+            cell.contentView.backgroundColor = UIColor.clearColor()
+        }
         
         return cell
     }
@@ -56,11 +83,11 @@ extension PlaylistsViewController: UITableViewDelegate {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
-            if let items = self.playlists[indexPath.row].items as? [MPMediaItem] {
-                tracksViewController.tracks = items
-                tracksViewController.title = self.playlists[indexPath.row].name
-                self.navigationController?.pushViewController(tracksViewController, animated: true)
-            }
+            let playlist = self.playlists[indexPath.row]
+            tracksViewController.playlist = playlist
+            tracksViewController.sourceType = .Playlist
+            tracksViewController.title = self.playlists[indexPath.row].name
+            self.navigationController?.pushViewController(tracksViewController, animated: true)
         }
     }
 }
