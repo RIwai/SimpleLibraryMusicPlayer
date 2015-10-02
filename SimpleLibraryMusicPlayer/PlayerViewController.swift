@@ -66,6 +66,10 @@ class PlayerViewController: UIViewController {
         self.repeatSwitch.on = LocalMusicPlayer.sharedPlayer.repeatStatus == .All
         self.shuffleSwitch.on = LocalMusicPlayer.sharedPlayer.shuffleMode == .On
 
+        // Buttons Long press
+        self.skipButton.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: "seekForward:"))
+        self.prevButton.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: "seekBackward:"))
+        
         // Player
         self.addPlayerObserver()
         self.playbackStatusDidChange()
@@ -142,6 +146,29 @@ class PlayerViewController: UIViewController {
         LocalMusicPlayer.sharedPlayer.shuffleMode = self.shuffleSwitch.on ? .On : .Off
     }
     
+    // MARK: Gesture handler
+    func seekForward(longPressGestureRecognizer: UILongPressGestureRecognizer) {
+        switch longPressGestureRecognizer.state {
+        case .Began:
+            LocalMusicPlayer.sharedPlayer.seekForward(begin: true)
+        case .Ended:
+            LocalMusicPlayer.sharedPlayer.seekForward(begin: false)
+        default:
+            break
+        }
+    }
+    
+    func seekBackward(longPressGestureRecognizer: UILongPressGestureRecognizer) {
+        switch longPressGestureRecognizer.state {
+        case .Began:
+            LocalMusicPlayer.sharedPlayer.seekBackward(begin: true)
+        case .Ended:
+            LocalMusicPlayer.sharedPlayer.seekBackward(begin: false)
+        default:
+            break
+        }
+    }
+    
     // MARK: Player notification handler
     func playbackStatusDidChange() {
         self.togglePlayButton()
@@ -160,6 +187,23 @@ class PlayerViewController: UIViewController {
         }
     }
 
+    func remoteSeekBegan() {
+        if self.timer == nil {
+            self.timer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
+        }
+    }
+
+    func remoteSeekEnded() {
+        if let timer = self.timer {
+            timer.invalidate()
+            self.timer = nil
+            
+            self.playbackTimer()
+        } else {
+            // Do nothing
+        }
+    }
+    
     // MARK: Timer method
     func playbackTimer() {
         self.currentTimeLabel.text = Util.timeString(LocalMusicPlayer.sharedPlayer.currentTime())
@@ -205,6 +249,8 @@ class PlayerViewController: UIViewController {
         NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicPaused, object: nil)
         NSNotificationCenter.addObserver(self, selector: "playingItemDidChange", event: .LocalMusicTrackDidChange, object: nil)
         NSNotificationCenter.addObserver(self, selector: "noPlayableTrack", event: .LocalMusicNoPlayableTrack, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "remoteSeekBegan", event: .LocalMusicSeekByRemoteBegan, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "remoteSeekEnded", event: .LocalMusicSeekByRemoteEnded, object: nil)
     }
     
     private func removePlayerObserver() {
@@ -212,6 +258,8 @@ class PlayerViewController: UIViewController {
         NSNotificationCenter.removeObserver(self, event: .LocalMusicPaused, object: nil)
         NSNotificationCenter.removeObserver(self, event: .LocalMusicTrackDidChange, object: nil)
         NSNotificationCenter.removeObserver(self, event: .LocalMusicNoPlayableTrack, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteBegan, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteEnded, object: nil)
     }
 
     private func togglePlayButton() {

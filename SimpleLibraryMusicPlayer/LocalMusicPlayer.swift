@@ -52,13 +52,14 @@ class LocalMusicPlayer: NSObject {
     
     // MARK: Private property
     private var currentPlayer: AVPlayer?
-    private var timer: NSTimer? = nil
+    private var remoteSeekTimer: NSTimer? = nil
     private var sourceType: LocalTrackSouceType = .Unkown
     private var currentCollection: MPMediaItemCollection?
     private var currentPlayList: MPMediaPlaylist?
     private var currentQueueIndex: Int = NSNotFound
     private var localTracksQueue: [MPMediaItem] = []
     private var watitingForPlay = false
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     
     // MARK: - Initalize
     override init() {
@@ -78,6 +79,10 @@ class LocalMusicPlayer: NSObject {
 
         // For Audio route change
         NSNotificationCenter.addObserver(self, selector: "audioSessionRouteChange:", name: AVAudioSessionRouteChangeNotification, object: nil)
+        
+        // For background task
+        NSNotificationCenter.addObserver(self, selector: "willResignActive:", name: UIApplicationWillResignActiveNotification, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "didBecomeActive:", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     deinit {
@@ -86,6 +91,8 @@ class LocalMusicPlayer: NSObject {
         NSNotificationCenter.removeObserver(self, name: UIApplicationDidEnterBackgroundNotification, object: nil)
         NSNotificationCenter.removeObserver(self, name: AVAudioSessionInterruptionNotification, object: nil)
         NSNotificationCenter.removeObserver(self, name: AVAudioSessionRouteChangeNotification, object: nil)
+        NSNotificationCenter.removeObserver(self, name: UIApplicationWillResignActiveNotification, object: nil)
+        NSNotificationCenter.removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     // MARK: - Internal methods
@@ -241,6 +248,74 @@ class LocalMusicPlayer: NSObject {
         })
     }
     
+    func seekForward(#begin :Bool) {
+        if self.isPlaying {
+            if let player = self.currentPlayer {
+                player.rate = begin ? 6 : 1
+            }
+            self.playbackInfoToNowPlayingInfoCenter()
+        } else {
+            if begin {
+                self.startSeekTimer(forward: true)
+            } else {
+                self.stopSeekTimer()
+            }
+        }
+    }
+    
+    func seekBackward(#begin :Bool) {
+        if self.isPlaying {
+            if let player = self.currentPlayer {
+                player.rate = begin ? -6 : 1
+            }
+            self.playbackInfoToNowPlayingInfoCenter()
+        } else if begin {
+            if begin {
+                self.startSeekTimer(forward: false)
+            } else {
+                self.stopSeekTimer()
+            }
+        }
+    }
+
+    func startSeekTimer(#forward : Bool) {
+        if self.remoteSeekTimer == nil {
+            self.remoteSeekTimer = NSTimer.scheduledTimerWithTimeInterval(0.2,
+                target: self,
+                selector: "remoteSeek:",
+                userInfo: ["Forward": forward],
+                repeats: true)
+            
+            NSNotificationCenter.postNotificationEvent(.LocalMusicSeekByRemoteBegan, object: nil)
+        }
+    }
+    
+    func stopSeekTimer() {
+        if self.remoteSeekTimer != nil {
+            self.remoteSeekTimer?.invalidate()
+            self.remoteSeekTimer = nil
+            NSNotificationCenter.postNotificationEvent(.LocalMusicSeekByRemoteEnded, object: nil)
+        }
+    }
+    
+    func remoteSeek(timer: NSTimer) {
+        if let isForward = timer.userInfo?["Forward"] as? Bool {
+            var currentTime = self.currentTime()
+            if isForward {
+                currentTime += 2
+                if currentTime >= self.currentTrackPlaybackDuration() {
+                    currentTime = self.currentTrackPlaybackDuration()
+                }
+            } else {
+                currentTime -= 2
+                if currentTime <= 0 {
+                    currentTime = 0
+                }
+            }
+            self.seekToTime(currentTime, completion: nil)
+        }
+    }
+    
     // MARK: Status
     func playBackStatusIsPlaying() -> Bool {
         if self.player().status == .ReadyToPlay && self.isPlaying == true {
@@ -360,6 +435,7 @@ class LocalMusicPlayer: NSObject {
         // AVPlayer proerty
         self.player().allowsExternalPlayback = false
         self.player().actionAtItemEnd = .None
+        self.player().rate = 0
         
         // Status KVO
         self.player().addObserver(self, forKeyPath: "status", options: .New, context: nil)
@@ -561,6 +637,12 @@ class LocalMusicPlayer: NSObject {
     
     // MARK: - Notification Handler
     func didPlayToEndTime() {
+        if let player = self.currentPlayer {
+            if player.rate != 1 && self.isPlaying {
+                self.pause()
+                return
+            }
+        }
         if self.canSkipToNext() {
             // Play next track
             self.skipToNext()
@@ -654,9 +736,12 @@ class LocalMusicPlayer: NSObject {
     private func addRemoteCommand() {
         MPRemoteCommandCenter.sharedCommandCenter().playCommand.addTarget(self, action: "remoteCommandPlay")
         MPRemoteCommandCenter.sharedCommandCenter().pauseCommand.addTarget(self, action: "remoteCommandPause")
+        MPRemoteCommandCenter.sharedCommandCenter().togglePlayPauseCommand.addTarget(self, action: "remoteCommandPlayOrPause")
         MPRemoteCommandCenter.sharedCommandCenter().stopCommand.addTarget(self, action: "remoteCommandStop")
         MPRemoteCommandCenter.sharedCommandCenter().nextTrackCommand.addTarget(self, action: "remoteCommandNext")
         MPRemoteCommandCenter.sharedCommandCenter().previousTrackCommand.addTarget(self, action: "remoteCommandPrevious")
+        MPRemoteCommandCenter.sharedCommandCenter().seekForwardCommand.addTarget(self, action: "remoteCommandseekForward:")
+        MPRemoteCommandCenter.sharedCommandCenter().seekBackwardCommand.addTarget(self, action: "remoteCommandseekBackward:")
     }
     
     // MARK: - Remote Command Handler
@@ -666,6 +751,14 @@ class LocalMusicPlayer: NSObject {
     
     func remoteCommandPause() {
         self.pause()
+    }
+    
+    func remoteCommandPlayOrPause() {
+        if self.isPlaying {
+            self.pause()
+        } else {
+            self.play()
+        }
     }
     
     func remoteCommandStop() {
@@ -678,5 +771,25 @@ class LocalMusicPlayer: NSObject {
     
     func remoteCommandPrevious() {
         self.skipToPrevisu()
+    }
+
+    func remoteCommandseekForward(event: MPSeekCommandEvent) {
+        self.seekForward(begin: event.type == .BeginSeeking)
+    }
+    
+    func remoteCommandseekBackward(event: MPSeekCommandEvent) {
+        self.seekBackward(begin: event.type == .BeginSeeking)
+    }
+    
+    // MARK: - For Background task
+    func willResignActive(notification: NSNotification) {
+        self.backgroundTaskIdentifier = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler({ () -> Void in
+            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskIdentifier)
+            self.backgroundTaskIdentifier = UIBackgroundTaskInvalid
+        })
+    }
+
+    func didBecomeActive(notification: NSNotification) {
+        UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskIdentifier)
     }
 }

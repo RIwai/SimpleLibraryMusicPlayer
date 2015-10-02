@@ -13,6 +13,8 @@ import Foundation
     case LocalMusicPaused
     case LocalMusicTrackDidChange
     case LocalMusicNoPlayableTrack
+    case LocalMusicSeekByRemoteBegan
+    case LocalMusicSeekByRemoteEnded
     case ShowPlayer
     
     var name: String {
@@ -22,6 +24,8 @@ import Foundation
             case LocalMusicPaused: return "LocalMusicPaused"
             case LocalMusicTrackDidChange: return "LocalMusicTrackDidChange"
             case LocalMusicNoPlayableTrack: return "LocalMusicNoPlayableTrack"
+            case LocalMusicSeekByRemoteBegan: return "LocalMusicSeekByRemoteBegan"
+            case LocalMusicSeekByRemoteEnded: return "LocalMusicSeekByRemoteEnded"
             case ShowPlayer: return "ShowPlayer"
             }
         }
