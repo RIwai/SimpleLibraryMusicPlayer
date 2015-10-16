@@ -66,7 +66,11 @@ class LocalMusicPlayer: NSObject {
         super.init()
         
         // Setup for background
-        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+        } catch {
+            // Do nothing
+        }
         
         // Add Remote Command
         self.addRemoteCommand()
@@ -101,7 +105,11 @@ class LocalMusicPlayer: NSObject {
         if self.canPlay() {
             self.isPlaying = true
             
-            AVAudioSession.sharedInstance().setActive(true, error: nil)
+            do {
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                // Do nothing
+            }
             
             self.player().play()
             
@@ -114,44 +122,36 @@ class LocalMusicPlayer: NSObject {
     }
     
     func playWithPlaylist(playlist: MPMediaPlaylist, selectTrackIndex: Int) -> Bool {
-        if let items = playlist.items as? [MPMediaItem] {
-            if self.hasPlayableItem(items) == false {
-                return false
-            }
-            
-            if self.playBackStatusIsPlaying() {
-                self.pause()
-            }
-            
-            self.sourceType = .Playlist
-            self.currentPlayList = playlist
-            self.currentCollection = nil
-            self.setItemsToPlayer(items, index: selectTrackIndex)
-            
-            return true
+        if self.hasPlayableItem(playlist.items) == false {
+            return false
         }
         
-        return false
+        if self.playBackStatusIsPlaying() {
+            self.pause()
+        }
+        
+        self.sourceType = .Playlist
+        self.currentPlayList = playlist
+        self.currentCollection = nil
+        self.setItemsToPlayer(playlist.items, index: selectTrackIndex)
+        
+        return true
     }
     
     func playWithCollection(collection: MPMediaItemCollection, selectTrackIndex: Int, type: LocalTrackSouceType) -> Bool {
-        if let items = collection.items as? [MPMediaItem] {
-            if self.hasPlayableItem(items) == false {
-                return false
-            }
-            if self.playBackStatusIsPlaying() {
-                self.pause()
-            }
-            
-            self.sourceType = type
-            self.currentCollection = collection
-            self.currentPlayList = nil
-            self.setItemsToPlayer(items, index: selectTrackIndex)
-            
-            return true
+        if self.hasPlayableItem(collection.items) == false {
+            return false
+        }
+        if self.playBackStatusIsPlaying() {
+            self.pause()
         }
         
-        return false
+        self.sourceType = type
+        self.currentCollection = collection
+        self.currentPlayList = nil
+        self.setItemsToPlayer(collection.items, index: selectTrackIndex)
+        
+        return true
     }
     
     func playWithTrack(meidaItem: MPMediaItem, type: LocalTrackSouceType) -> Bool {
@@ -181,7 +181,11 @@ class LocalMusicPlayer: NSObject {
         self.playbackInfoToNowPlayingInfoCenter()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
-            AVAudioSession.sharedInstance().setActive(false, error: nil)
+            do {
+                try AVAudioSession.sharedInstance().setActive(false)
+            } catch {
+                // Do nothing
+            }
         })
     }
     
@@ -228,7 +232,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     func artistName() -> String? {
-        return self.currentCollection?.representativeItem.artist
+        return self.currentCollection?.representativeItem!.artist
     }
     
     // MARK: Seek
@@ -238,17 +242,18 @@ class LocalMusicPlayer: NSObject {
             return
         }
         
+        guard let currentItem = self.player().currentItem else { return }
         var seekTime = kCMTimeZero
         if targetTime != 0 {
-            seekTime = CMTimeMakeWithSeconds(Float64(targetTime), self.player().currentItem.asset.duration.timescale)
+            seekTime = CMTimeMakeWithSeconds(Float64(targetTime), currentItem.asset.duration.timescale)
         }
-        self.player().currentItem.seekToTime(seekTime, completionHandler: { (finished) -> Void in
+        currentItem.seekToTime(seekTime, completionHandler: { (finished) -> Void in
             completion?()
             self.updatePlaybackTimeToNowPlayingInfoCenter()
         })
     }
     
-    func seekForward(#begin :Bool) {
+    func seekForward(begin begin :Bool) {
         if self.isPlaying {
             if let player = self.currentPlayer {
                 player.rate = begin ? 6 : 1
@@ -263,7 +268,7 @@ class LocalMusicPlayer: NSObject {
         }
     }
     
-    func seekBackward(#begin :Bool) {
+    func seekBackward(begin begin :Bool) {
         if self.isPlaying {
             if let player = self.currentPlayer {
                 player.rate = begin ? -6 : 1
@@ -278,7 +283,7 @@ class LocalMusicPlayer: NSObject {
         }
     }
 
-    func startSeekTimer(#forward : Bool) {
+    func startSeekTimer(forward forward : Bool) {
         if self.remoteSeekTimer == nil {
             self.remoteSeekTimer = NSTimer.scheduledTimerWithTimeInterval(0.2,
                 target: self,
@@ -379,8 +384,9 @@ class LocalMusicPlayer: NSObject {
     }
     
     func canPlay() -> Bool {
+        guard let currentItem = self.player().currentItem else { return false }
         return (self.player().currentItem != nil) &&
-            (self.player().currentItem.status == .ReadyToPlay) &&
+            (currentItem.status == .ReadyToPlay) &&
             (self.player().status == .ReadyToPlay)
     }
     
@@ -398,8 +404,7 @@ class LocalMusicPlayer: NSObject {
     func isCurrentCollection(collection: MPMediaItemCollection) -> Bool {
         if self.sourceType == .Artist {
             if let currentArtist = self.items()?.first?.artist,
-                let items = collection.items as? [MPMediaItem],
-                let artist = items.first?.artist{
+                let artist = collection.items.first?.artist{
                     if currentArtist == artist {
                         return true
                     }
@@ -582,9 +587,7 @@ class LocalMusicPlayer: NSObject {
     
     private func items() -> [MPMediaItem]? {
         if let collection = self.collection() {
-            if let items = collection.items as? [MPMediaItem] {
-                return items
-            }
+            return collection.items
         }
         return nil
     }
@@ -619,7 +622,7 @@ class LocalMusicPlayer: NSObject {
                 }
             }
         } else {
-            if let items = self.collection()?.items as? [MPMediaItem] {
+            if let items = self.collection()?.items {
                 if let currentTrack = self.currentTrack() {
                     for var newCurrentIndex = 0 ; newCurrentIndex < items.count ; newCurrentIndex++ {
                         if currentTrack == items[newCurrentIndex] {
@@ -655,7 +658,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     // MARK: - KVO Handler
-    override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if keyPath == "status" {
             if let playerItem = self.player().currentItem {
                 if self.player().status == .ReadyToPlay && playerItem.status == .ReadyToPlay {
@@ -672,46 +675,44 @@ class LocalMusicPlayer: NSObject {
     
     // MARK: - For MPNowPlayingInfoCenter
     func playbackInfoToNowPlayingInfoCenter() {
-        if let mediaItem = self.currentTrack() {
-            MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = [
-                MPMediaItemPropertyTitle: mediaItem.title,
-                MPMediaItemPropertyArtist: mediaItem.artist,
-                MPMediaItemPropertyAlbumTitle: mediaItem.albumTitle,
-                MPMediaItemPropertyPlaybackDuration: NSNumber(double: self.currentTrackPlaybackDuration()),
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(double: self.currentTime()),
-                MPNowPlayingInfoPropertyPlaybackRate: NSNumber(float: self.player().rate),
-                MPMediaItemPropertyArtwork: mediaItem.artwork]
+        guard let mediaItem = self.currentTrack() else { return }
+        var playingInfo: [String: AnyObject] = [
+            MPMediaItemPropertyTitle: mediaItem.title ?? "",
+            MPMediaItemPropertyArtist: mediaItem.artist ?? "",
+            MPMediaItemPropertyAlbumTitle: mediaItem.albumTitle ?? "",
+            MPMediaItemPropertyPlaybackDuration: NSNumber(double: self.currentTrackPlaybackDuration()),
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(double: self.currentTime()),
+            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(float: self.player().rate)]
+        if mediaItem.artwork != nil {
+            playingInfo[MPMediaItemPropertyArtwork] = mediaItem.artwork
         }
+        MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = playingInfo
     }
     
     private func updatePlaybackTimeToNowPlayingInfoCenter() {
-        if let mediaItem = self.currentTrack() {
-            MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = [
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(double: self.currentTime())]
+        if self.currentTrack() != nil {
+            if var playingInfo = MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo {
+                playingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(double: self.currentTime())
+                MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = playingInfo
+            }
         }
     }
 
     // MARK: - For AVAudioSessionInterruptionNotification
     func audioSessionInterruption(notification: NSNotification) {
-        if let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber {
-            if let type = AVAudioSessionInterruptionType(rawValue: interruptionType.unsignedLongValue) {
-                switch type {
-                case .Began:
-                    if self.isPlaying {
-                        self.pause()
-                    }
-                    
-                case .Ended:
-                    if let interruptionOption = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber {
-                        if interruptionOption.unsignedLongValue == AVAudioSessionInterruptionOptions.OptionShouldResume.rawValue {
-                            self.play()
-                        }
-                    }
-                    
-                default:
-                    break
-                }
+        guard let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
+        guard let type = AVAudioSessionInterruptionType(rawValue: interruptionType.unsignedLongValue) else { return }
+        switch type {
+        case .Began:
+            if self.isPlaying {
+                self.pause()
             }
+            
+        case .Ended:
+            guard let interruptionOption = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber else { return }
+            if interruptionOption.unsignedLongValue == AVAudioSessionInterruptionOptions.ShouldResume.rawValue {
+                self.play()
+            }            
         }
     }
 

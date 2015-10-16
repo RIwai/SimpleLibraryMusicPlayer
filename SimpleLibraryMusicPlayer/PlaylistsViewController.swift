@@ -37,7 +37,7 @@ class PlaylistsViewController: BaseViewController {
     }
 
     override func updateCells() {
-        for cell in self.tableView.visibleCells() {
+        for cell in self.tableView.visibleCells {
             if let playlistCell = cell as? PlaylistCell {
                 if let indexPath = self.tableView.indexPathForCell(playlistCell) {
                     let playlist = self.playlists[indexPath.row]

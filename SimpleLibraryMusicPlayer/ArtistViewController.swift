@@ -28,7 +28,9 @@ class ArtistViewController: BaseViewController {
         // Include iCloud item
         query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
 
-        self.artists = query.collections as? [MPMediaItemCollection] ?? []
+        if let collections = query.collections {
+            self.artists = collections
+        }
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -38,7 +40,7 @@ class ArtistViewController: BaseViewController {
     }
     
     override func updateCells() {
-        for cell in self.tableView.visibleCells() {
+        for cell in self.tableView.visibleCells {
             if let artistCell = cell as? ArtistCell {
                 if let indexPath = self.tableView.indexPathForCell(artistCell) {
                     let artist = self.artists[indexPath.row]
@@ -64,7 +66,9 @@ extension ArtistViewController: UITableViewDataSource {
         let artist = self.artists[indexPath.row]
         let cell = self.tableView.dequeueReusableCellWithIdentifier("ArtistCell", forIndexPath: indexPath) as! ArtistCell
         
-        cell.artistNameLabel.text = artist.representativeItem.artist
+        if let representativeItem = artist.representativeItem {
+            cell.artistNameLabel.text = representativeItem.artist
+        }
         cell.trackCountLabel.text = "  \(artist.count) track(s)"
         
         if LocalMusicPlayer.sharedPlayer.isCurrentCollection(artist) {
@@ -86,7 +90,9 @@ extension ArtistViewController: UITableViewDelegate {
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
             tracksViewController.collection = self.artists[indexPath.row]
             tracksViewController.sourceType = .Artist
-            tracksViewController.title = self.artists[indexPath.row].representativeItem.artist
+            if let representativeItem = self.artists[indexPath.row].representativeItem {
+                tracksViewController.title = representativeItem.artist
+            }
             self.navigationController?.pushViewController(tracksViewController, animated: true)
         }
     }

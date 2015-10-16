@@ -35,11 +35,11 @@ enum SelectType: Int {
         get {
             switch self {
             case .Playlist:
-                return UIStoryboard(name: "PlaylistsViewController", bundle: nil).instantiateInitialViewController() as? UIViewController
+                return UIStoryboard(name: "PlaylistsViewController", bundle: nil).instantiateInitialViewController()
             case .Album:
-                return UIStoryboard(name: "AlbumsViewController", bundle: nil).instantiateInitialViewController() as? UIViewController
+                return UIStoryboard(name: "AlbumsViewController", bundle: nil).instantiateInitialViewController()
             case .Artist:
-                return UIStoryboard(name: "ArtistViewController", bundle: nil).instantiateInitialViewController() as? UIViewController
+                return UIStoryboard(name: "ArtistViewController", bundle: nil).instantiateInitialViewController()
             case .Track:
                 if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
                     let query = MPMediaQuery.songsQuery()
@@ -80,7 +80,7 @@ extension SelectViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCellWithIdentifier("NormalCell", forIndexPath: indexPath) as! UITableViewCell
+        let cell = self.tableView.dequeueReusableCellWithIdentifier("NormalCell", forIndexPath: indexPath)
         
         cell.textLabel?.text = SelectType(rawValue: indexPath.row)?.title ?? ""
         

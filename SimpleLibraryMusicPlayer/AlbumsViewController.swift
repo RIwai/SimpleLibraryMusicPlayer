@@ -27,7 +27,9 @@ class AlbumsViewController: BaseViewController {
         query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
         query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
-        self.albums = query.collections as? [MPMediaItemCollection] ?? []
+        if let collections = query.collections {
+            self.albums = collections
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -37,7 +39,7 @@ class AlbumsViewController: BaseViewController {
     }
     
     override func updateCells() {
-        for cell in self.tableView.visibleCells() {
+        for cell in self.tableView.visibleCells {
             if let albumCell = cell as? AlbumCell {
                 if let indexPath = self.tableView.indexPathForCell(albumCell) {
                     let album = self.albums[indexPath.row]
@@ -63,14 +65,16 @@ extension AlbumsViewController: UITableViewDataSource {
         let album = self.albums[indexPath.row]
         let cell = self.tableView.dequeueReusableCellWithIdentifier("AlbumCell", forIndexPath: indexPath) as! AlbumCell
         
-        cell.albumTitleLabel.text = album.representativeItem.albumTitle
-        cell.artistNameLabel.text = album.representativeItem.artist
         cell.trackCountLabel.text = "  \(album.count) track(s)"
-        if let artwork = album.representativeItem.artwork {
-            let scale = UIScreen.mainScreen().scale
-            cell.artworkImageView.image = artwork.imageWithSize(CGSizeMake(80 * scale, 80 * scale))
-        } else {
-            cell.artworkImageView.image = nil
+        if let representativeItem = album.representativeItem {
+            cell.albumTitleLabel.text = representativeItem.albumTitle
+            cell.artistNameLabel.text = representativeItem.artist
+            if let artwork = representativeItem.artwork {
+                let scale = UIScreen.mainScreen().scale
+                cell.artworkImageView.image = artwork.imageWithSize(CGSizeMake(80 * scale, 80 * scale))
+            } else {
+                cell.artworkImageView.image = nil
+            }
         }
 
         if LocalMusicPlayer.sharedPlayer.isCurrentCollection(album) {
@@ -92,7 +96,9 @@ extension AlbumsViewController: UITableViewDelegate {
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
             tracksViewController.collection = self.albums[indexPath.row]
             tracksViewController.sourceType = .Album
-            tracksViewController.title = self.albums[indexPath.row].representativeItem.albumTitle
+            if let representativeItem = self.albums[indexPath.row].representativeItem {
+                tracksViewController.title = representativeItem.albumTitle
+            }
             self.navigationController?.pushViewController(tracksViewController, animated: true)
         }
     }

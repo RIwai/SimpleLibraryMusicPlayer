@@ -21,7 +21,7 @@ class TracksViewController: BaseViewController {
 
     // MARK: - Override method
     override func updateCells() {
-        for cell in self.tableView.visibleCells() {
+        for cell in self.tableView.visibleCells {
             if let trackCell = cell as? TrackCell {
                 if let indexPath = self.tableView.indexPathForCell(trackCell) {
                     if let mediaItem = self.mediaItem(indexPath.row - 1) {
@@ -44,9 +44,7 @@ class TracksViewController: BaseViewController {
     private func mediaItem(index: Int) -> MPMediaItem? {
         if let correction = self.currentCollection() {
             if correction.items.count > index {
-                if let item = correction.items[index] as? MPMediaItem {
-                    return item
-                }
+                return correction.items[index]
             }
         }
         return nil
