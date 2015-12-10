@@ -14,6 +14,7 @@ class PlayerViewController: UIViewController {
 
     // MARK: - Outlet property
     @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet weak var videoPlayerView: VideoPlayerView!
     @IBOutlet weak var artworkImageView: UIImageView!
     @IBOutlet weak var trackTitleLabel: UILabel!
     @IBOutlet weak var artistNameLabel: UILabel!
@@ -204,6 +205,14 @@ class PlayerViewController: UIViewController {
         }
     }
     
+    func playVideo(notfication: NSNotification) {
+        guard let player = notfication.userInfo?["player"] as? AVPlayer else{
+            return
+        }
+        
+        self.playVide(player)
+    }
+    
     // MARK: Timer method
     func playbackTimer() {
         self.currentTimeLabel.text = Util.timeString(LocalMusicPlayer.sharedPlayer.currentTime())
@@ -219,7 +228,11 @@ class PlayerViewController: UIViewController {
             self.artworkImageView.image = nil
         }
         
-        self.trackTitleLabel.text = "[\(meidaItem.albumTrackNumber)]  \(meidaItem.title)"
+        if let trackTitle = meidaItem.title {
+            self.trackTitleLabel.text = "[\(meidaItem.albumTrackNumber)] \(trackTitle)"
+        } else {
+            self.trackTitleLabel.text = "[\(meidaItem.albumTrackNumber)]"
+        }
         self.artistNameLabel.text = meidaItem.artist ?? "-"
         self.albumTitleLabel.text = meidaItem.albumTitle ?? "-"
         self.lylicsTextView.hidden = true
@@ -251,6 +264,7 @@ class PlayerViewController: UIViewController {
         NSNotificationCenter.addObserver(self, selector: "noPlayableTrack", event: .LocalMusicNoPlayableTrack, object: nil)
         NSNotificationCenter.addObserver(self, selector: "remoteSeekBegan", event: .LocalMusicSeekByRemoteBegan, object: nil)
         NSNotificationCenter.addObserver(self, selector: "remoteSeekEnded", event: .LocalMusicSeekByRemoteEnded, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "playVideo:", event: .PlayVideo, object: nil)
     }
     
     private func removePlayerObserver() {
@@ -260,6 +274,7 @@ class PlayerViewController: UIViewController {
         NSNotificationCenter.removeObserver(self, event: .LocalMusicNoPlayableTrack, object: nil)
         NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteBegan, object: nil)
         NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteEnded, object: nil)
+        NSNotificationCenter.removeObserver(self, event: .PlayVideo, object: nil)
     }
 
     private func togglePlayButton() {
@@ -292,4 +307,10 @@ class PlayerViewController: UIViewController {
         }
     }
     
+    private func playVide(player: AVPlayer) {
+        // Play Video
+        self.artworkImageView.hidden = true
+        self.videoPlayerView.hidden = false
+        self.videoPlayerView.setVideoPlayer(player)
+    }
 }

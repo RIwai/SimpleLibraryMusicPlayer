@@ -34,6 +34,8 @@
 		CABB84951BA7E0E0000352BE /* PlayerButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */; };
 		CABB84971BA7E0EB000352BE /* PlayerButtonView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */; };
 		CABB84991BA7E7BC000352BE /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84981BA7E7BC000352BE /* BaseViewController.swift */; };
+		CAC2E26D1C190E4900C5B135 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC2E26C1C190E4900C5B135 /* VideoPlayerView.swift */; };
+		CAC2E26F1C19131800C5B135 /* AVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC2E26E1C19131800C5B135 /* AVPlayerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,8 @@
 		CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerButtonView.swift; sourceTree = "<group>"; };
 		CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerButtonView.xib; sourceTree = "<group>"; };
 		CABB84981BA7E7BC000352BE /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
+		CAC2E26C1C190E4900C5B135 /* VideoPlayerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		CAC2E26E1C19131800C5B135 /* AVPlayerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVPlayerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +121,8 @@
 				CA1406541B8DAF9500D96D65 /* TracksViewController.storyboard */,
 				CA07E4611B81800B00FB25B4 /* PlayerViewController.swift */,
 				CA07E4621B81800B00FB25B4 /* PlayerViewController.xib */,
+				CAC2E26C1C190E4900C5B135 /* VideoPlayerView.swift */,
+				CAC2E26E1C19131800C5B135 /* AVPlayerView.swift */,
 				CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */,
 				CABB84941BA7E0E0000352BE /* PlayerButtonView.swift */,
 				CABB84961BA7E0EB000352BE /* PlayerButtonView.xib */,
@@ -164,7 +170,8 @@
 		CA07E4321B8165BC00FB25B4 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastSwiftUpdateCheck = 0710;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Ryota Iwai";
 				TargetAttributes = {
 					CA07E4391B8165BC00FB25B4 = {
@@ -220,8 +227,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA1406611B8DCECD00D96D65 /* ArtistCell.swift in Sources */,
+				CAC2E26D1C190E4900C5B135 /* VideoPlayerView.swift in Sources */,
 				CA07E4631B81800B00FB25B4 /* PlayerViewController.swift in Sources */,
 				CA14064D1B8DA81E00D96D65 /* PlaylistsViewController.swift in Sources */,
+				CAC2E26F1C19131800C5B135 /* AVPlayerView.swift in Sources */,
 				CA1406531B8DAF8900D96D65 /* TracksViewController.swift in Sources */,
 				CA1406571B8DB8E200D96D65 /* AlbumsViewController.swift in Sources */,
 				CABB84991BA7E7BC000352BE /* BaseViewController.swift in Sources */,
@@ -283,6 +292,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -298,7 +308,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -336,7 +346,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -350,6 +360,7 @@
 				INFOPLIST_FILE = SimpleLibraryMusicPlayer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.co.riwi.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -361,6 +372,7 @@
 				INFOPLIST_FILE = SimpleLibraryMusicPlayer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.co.riwi.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

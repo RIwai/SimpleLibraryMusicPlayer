@@ -518,6 +518,9 @@ class LocalMusicPlayer: NSObject {
                     self.removePlayer()
                     self.createPlayer(self.playerItem(urlAsset))
                     NSNotificationCenter.postNotificationEvent(.LocalMusicTrackDidChange, object: self)
+                    if self.isVideoType(item) {
+                        NSNotificationCenter.postNotificationEvent(.PlayVideo, object: nil, userInfo: ["player": self.player()])
+                    }
                     if self.player().status == .ReadyToPlay {
                         self.watitingForPlay = false
                         self.play()
@@ -529,6 +532,13 @@ class LocalMusicPlayer: NSObject {
             return true
         }
         // Can not playback because this track maybe iCloud or DRM.
+        return false
+    }
+    
+    private func isVideoType(item: MPMediaItem) -> Bool {
+        if item.mediaType.intersect(.AnyVideo).rawValue != 0 {
+            return true
+        }
         return false
     }
     

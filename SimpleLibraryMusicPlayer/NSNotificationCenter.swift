@@ -16,6 +16,7 @@ import Foundation
     case LocalMusicSeekByRemoteBegan
     case LocalMusicSeekByRemoteEnded
     case ShowPlayer
+    case PlayVideo
     
     var name: String {
         get {
@@ -27,6 +28,7 @@ import Foundation
             case LocalMusicSeekByRemoteBegan: return "LocalMusicSeekByRemoteBegan"
             case LocalMusicSeekByRemoteEnded: return "LocalMusicSeekByRemoteEnded"
             case ShowPlayer: return "ShowPlayer"
+            case PlayVideo: return "PlayVideo"
             }
         }
     }
@@ -59,5 +61,9 @@ public extension NSNotificationCenter {
     // MARK: Post
     class func postNotificationEvent(event: NCEventKey, object: AnyObject?) {
         self.defaultCenter().postNotificationName(event.name, object: object)
+    }
+
+    class func postNotificationEvent(event: NCEventKey, object: AnyObject?, userInfo: [NSObject: AnyObject]?) {
+        self.defaultCenter().postNotificationName(event.name, object: object, userInfo: userInfo)
     }
 }
