@@ -14,6 +14,7 @@ class PlayerViewController: UIViewController {
 
     // MARK: - Outlet property
     @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet weak var fullScreenButtonContainerView: UIView!
     @IBOutlet weak var videoPlayerView: VideoPlayerView!
     @IBOutlet weak var artworkImageView: UIImageView!
     @IBOutlet weak var trackTitleLabel: UILabel!
@@ -32,6 +33,8 @@ class PlayerViewController: UIViewController {
     // MARK: Private property
     private var timer: NSTimer? = nil
     private var sliderTracking: Bool = false
+    private var fullScreenVideoConinerViewController: FullScreenVideoConinerViewController?
+    private var fullScreenBaseView: UIView?
     
     // MARK: - Override methods
     override func viewDidLoad() {
@@ -72,11 +75,16 @@ class PlayerViewController: UIViewController {
         self.prevButton.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: "seekBackward:"))
         
         // Player
-        self.addPlayerObserver()
         self.playbackStatusDidChange()
         self.playingItemDidChange()
     }
 
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.addNotificationObserver()
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -91,10 +99,15 @@ class PlayerViewController: UIViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        self.removePlayerObserver()
+        self.removeNotificationObserver()
     }
     
-    // MARK: Action methods
+    // Status bar
+    override func prefersStatusBarHidden() -> Bool {
+        return self.fullScreenVideoConinerViewController != nil
+    }
+    
+    // MARK: - Action methods
     @IBAction func tapCloseButton(sender: AnyObject) {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
@@ -147,7 +160,11 @@ class PlayerViewController: UIViewController {
         LocalMusicPlayer.sharedPlayer.shuffleMode = self.shuffleSwitch.on ? .On : .Off
     }
     
-    // MARK: Gesture handler
+    @IBAction func tapFullScreenButton(sender: AnyObject) {
+        self.videoToFullScreen(isLandscapeLeft: true)
+    }
+
+    // MARK: - Gesture handler
     func seekForward(longPressGestureRecognizer: UILongPressGestureRecognizer) {
         switch longPressGestureRecognizer.state {
         case .Began:
@@ -170,62 +187,100 @@ class PlayerViewController: UIViewController {
         }
     }
     
-    // MARK: Player notification handler
+    // MARK: - Player notification handler
     func playbackStatusDidChange() {
-        self.togglePlayButton()
-        self.playbackTimeTimer()
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.togglePlayButton()
+            self.playbackTimeTimer()
+        })
     }
 
     func playingItemDidChange() {
-        if let currentMediaItem = LocalMusicPlayer.sharedPlayer.currentTrack() {
-            self.setupUIPartsWithMediaItem(currentMediaItem)
-        }
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            if let currentMediaItem = LocalMusicPlayer.sharedPlayer.currentTrack() {
+                self.setupUIPartsWithMediaItem(currentMediaItem)
+            }
+        })
     }
     
     func noPlayableTrack() {
-        if LocalMusicPlayer.sharedPlayer.currentTrack() == nil {
-            self.dismissViewControllerAnimated(true, completion: nil)
-        }
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            if LocalMusicPlayer.sharedPlayer.currentTrack() == nil {
+                self.dismissViewControllerAnimated(true, completion: nil)
+            }
+        })
     }
 
     func remoteSeekBegan() {
-        if self.timer == nil {
-            self.timer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
-        }
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            if self.timer == nil {
+                self.timer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: "playbackTimer", userInfo: nil, repeats: true)
+            }
+        })
     }
 
     func remoteSeekEnded() {
-        if let timer = self.timer {
-            timer.invalidate()
-            self.timer = nil
-            
-            self.playbackTimer()
-        } else {
-            // Do nothing
-        }
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            if let timer = self.timer {
+                timer.invalidate()
+                self.timer = nil
+                
+                self.playbackTimer()
+            } else {
+                // Do nothing
+            }
+        })
     }
     
+    // MARK: - Video
     func playVideo(notfication: NSNotification) {
         guard let player = notfication.userInfo?["player"] as? AVPlayer else{
             return
         }
         
-        self.playVide(player)
+        self.setUpVideo(player)
     }
     
-    // MARK: Timer method
+    // MARK: - Device Roate
+    func rotateChanged() {
+        if !self.isVideoPlay() {
+            return
+        }
+
+        switch UIDevice.currentDevice().orientation {
+        case .Portrait:
+            self.videoToNormalSize()
+        case .LandscapeLeft:
+            self.videoToFullScreen(isLandscapeLeft: true)
+        case .LandscapeRight:
+            self.videoToFullScreen(isLandscapeLeft: false)
+        default:
+            break
+        }
+    }
+    
+    // MARK: - Timer method
     func playbackTimer() {
         self.currentTimeLabel.text = Util.timeString(LocalMusicPlayer.sharedPlayer.currentTime())
         self.seekSlider.setValue(Float(LocalMusicPlayer.sharedPlayer.currentTime()), animated: true)
     }
 
-    // MARK: Private methods
+    // MARK: - Private methods
     private func setupUIPartsWithMediaItem(meidaItem: MPMediaItem) {
-        if let artwork = meidaItem.artwork {
-            let scale = UIScreen.mainScreen().scale
-            self.artworkImageView.image = artwork.imageWithSize(CGSizeMake(200 * scale, 200 * scale))
+        if LocalMusicPlayer.sharedPlayer.isCurrentTrackVideo() {
+            if let videoPlayer = LocalMusicPlayer.sharedPlayer.currentVideoPlayer() {
+                self.setUpVideo(videoPlayer)
+            }
         } else {
-            self.artworkImageView.image = nil
+            self.artworkImageView.hidden = false
+            self.videoPlayerView.hidden = true
+            self.fullScreenButtonContainerView.hidden = true
+            if let artwork = meidaItem.artwork {
+                let scale = UIScreen.mainScreen().scale
+                self.artworkImageView.image = artwork.imageWithSize(CGSizeMake(200 * scale, 200 * scale))
+            } else {
+                self.artworkImageView.image = nil
+            }
         }
         
         if let trackTitle = meidaItem.title {
@@ -257,24 +312,26 @@ class PlayerViewController: UIViewController {
         self.updateSkipButtons()
     }
     
-    private func addPlayerObserver() {
+    private func addNotificationObserver() {
+        // Player status
         NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicStarted, object: nil)
         NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicPaused, object: nil)
         NSNotificationCenter.addObserver(self, selector: "playingItemDidChange", event: .LocalMusicTrackDidChange, object: nil)
         NSNotificationCenter.addObserver(self, selector: "noPlayableTrack", event: .LocalMusicNoPlayableTrack, object: nil)
         NSNotificationCenter.addObserver(self, selector: "remoteSeekBegan", event: .LocalMusicSeekByRemoteBegan, object: nil)
         NSNotificationCenter.addObserver(self, selector: "remoteSeekEnded", event: .LocalMusicSeekByRemoteEnded, object: nil)
+        
+        // Video
         NSNotificationCenter.addObserver(self, selector: "playVideo:", event: .PlayVideo, object: nil)
+        
+        // Roate
+        UIDevice.currentDevice().beginGeneratingDeviceOrientationNotifications()
+        NSNotificationCenter.addObserver(self, selector: "rotateChanged", name: UIDeviceOrientationDidChangeNotification, object: nil)
     }
     
-    private func removePlayerObserver() {
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicStarted, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicPaused, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicTrackDidChange, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicNoPlayableTrack, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteBegan, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicSeekByRemoteEnded, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .PlayVideo, object: nil)
+    private func removeNotificationObserver() {
+        UIDevice.currentDevice().endGeneratingDeviceOrientationNotifications()
+        NSNotificationCenter.removeObserver(self)
     }
 
     private func togglePlayButton() {
@@ -307,10 +364,114 @@ class PlayerViewController: UIViewController {
         }
     }
     
-    private func playVide(player: AVPlayer) {
+    private func setUpVideo(player: AVPlayer) {
         // Play Video
         self.artworkImageView.hidden = true
         self.videoPlayerView.hidden = false
+        self.fullScreenButtonContainerView.hidden = false
         self.videoPlayerView.setVideoPlayer(player)
     }
+    
+    private func isVideoPlay() -> Bool {
+        return !self.videoPlayerView.hidden
+    }
+    
+    private func isVideoFullScreen() -> Bool {
+        if self.fullScreenVideoConinerViewController != nil {
+            return true
+        }
+        
+        return false
+    }
+    
+    // MARK: Video Full Screen
+    private func videoToFullScreen(isLandscapeLeft isLandscapeLeft: Bool) {
+        if self.isVideoFullScreen() {
+            return
+        }
+
+        self.fullScreenBaseView = UIView(frame: UIScreen.mainScreen().bounds)
+        guard let fullScreenBaseView = self.fullScreenBaseView else {
+            return
+        }
+        
+        self.fullScreenVideoConinerViewController = FullScreenVideoConinerViewController(nibName: "FullScreenVideoConinerViewController", bundle:nil)
+        guard let fullScreenVideoConinerViewController = self.fullScreenVideoConinerViewController else {
+            self.fullScreenBaseView = nil
+            return
+        }
+        
+        guard let avPlayerView = self.videoPlayerView.removeAVPlayerView() else {
+            self.fullScreenBaseView = nil
+            self.fullScreenVideoConinerViewController = nil
+            return
+        }
+        
+        fullScreenBaseView.backgroundColor = UIColor.clearColor()
+        self.view.addSubview(fullScreenBaseView)
+        
+        fullScreenVideoConinerViewController.view.frame = self.videoPlayerView.frame
+        fullScreenVideoConinerViewController.modalPresentationCapturesStatusBarAppearance = true
+        self.addChildViewController(fullScreenVideoConinerViewController)
+        fullScreenBaseView.addSubview(fullScreenVideoConinerViewController.view)
+        fullScreenVideoConinerViewController.didMoveToParentViewController(self)
+        fullScreenVideoConinerViewController.delegate = self
+
+        fullScreenVideoConinerViewController.setVideoView(avPlayerView)
+
+        self.setNeedsStatusBarAppearanceUpdate()
+        
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            fullScreenBaseView.backgroundColor = UIColor.blackColor()
+            let rotation = CGFloat((M_PI / 2) * (isLandscapeLeft ? 1 : -1))
+            fullScreenVideoConinerViewController.view.transform = CGAffineTransformMakeRotation(rotation)
+            fullScreenVideoConinerViewController.view.frame = fullScreenBaseView.frame
+            }) { (finish) -> Void in
+                fullScreenVideoConinerViewController.tapVideoView()
+        }
+    }
+    
+    private func videoToNormalSize() {
+        if !self.isVideoFullScreen() {
+            return
+        }
+
+        guard
+            let fullScreenBaseView = self.fullScreenBaseView,
+            let fullScreenVideoConinerViewController = self.fullScreenVideoConinerViewController else {
+                return
+        }
+
+        fullScreenVideoConinerViewController.videoControllerHidden()
+
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            fullScreenBaseView.backgroundColor = UIColor.clearColor()
+            fullScreenVideoConinerViewController.view.transform = CGAffineTransformIdentity
+            fullScreenVideoConinerViewController.view.frame = self.videoPlayerView.frame
+            
+            }) { (finish) -> Void in
+                fullScreenVideoConinerViewController.removeVideoPlayerView()
+                self.videoPlayerView.addAVPlayerView()
+                
+                fullScreenVideoConinerViewController.willMoveToParentViewController(nil)
+                fullScreenVideoConinerViewController.view.removeFromSuperview()
+                fullScreenVideoConinerViewController.removeFromParentViewController()
+                
+                fullScreenBaseView.removeFromSuperview()
+                
+                self.fullScreenBaseView = nil
+                self.fullScreenVideoConinerViewController = nil
+
+                self.setNeedsStatusBarAppearanceUpdate()
+        }
+    }
 }
+
+// MARK: - FullScreenVideoConinerViewControllerDelegate
+extension PlayerViewController: FullScreenVideoConinerViewControllerDelegate {
+    
+    func closeFullScreen(fullScreenVideoConinerViewController: FullScreenVideoConinerViewController) {
+        self.videoToNormalSize()
+    }
+}
+

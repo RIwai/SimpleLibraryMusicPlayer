@@ -12,15 +12,11 @@ import MediaPlayer
 
 class AVPlayerView: UIView {
     
-    // MARK: Initialize
-    required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)!
+    // MARK: deinit
+    deinit {
+        NSNotificationCenter.removeObserver(self)
     }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
+
     // MARK: Override
     override class func layerClass() -> AnyClass {
         return AVPlayerLayer.self
@@ -34,10 +30,31 @@ class AVPlayerView: UIView {
         }
     }
 
-    // MARK: Play Video
+    // MARK: Video
     func setPlayer(avplayer: AVPlayer) {
-        let layer = self.layer as! AVPlayerLayer
+        guard let layer = self.layer as? AVPlayerLayer else {
+            return
+        }
         layer.videoGravity = AVLayerVideoGravityResizeAspect
         layer.player = avplayer
+
+        NSNotificationCenter.addObserver(self, selector: "willResignActive:", name: UIApplicationWillResignActiveNotification, object: nil)
+        NSNotificationCenter.addObserver(self, selector: "didBecomeActive:", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
+
+    // MARK: For Background
+    func willResignActive(notification: NSNotification) {
+        guard let layer = self.layer as? AVPlayerLayer else {
+            return
+        }
+        layer.player = nil
+    }
+
+    func didBecomeActive(notification: NSNotification) {
+        guard let layer = self.layer as? AVPlayerLayer else {
+            return
+        }
+        layer.player = LocalMusicPlayer.sharedPlayer.currentVideoPlayer()
+    }
+    
 }

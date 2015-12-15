@@ -428,6 +428,20 @@ class LocalMusicPlayer: NSObject {
         return false
     }
     
+    func isCurrentTrackVideo() -> Bool {
+        if let currentTrack = self.currentTrack() {
+            return self.isVideoType(currentTrack)
+        }
+        return false
+    }
+    
+    func currentVideoPlayer() -> AVPlayer? {
+        if !isCurrentTrackVideo() {
+            return nil
+        }
+        return self.currentPlayer
+    }
+    
     // MARK: - Private methods
     // MARK: Player
     private func createPlayer(item: AVPlayerItem?) {
