@@ -29,6 +29,7 @@
 		CA14065D1B8DCE9900D96D65 /* ArtistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA14065C1B8DCE9900D96D65 /* ArtistViewController.swift */; };
 		CA14065F1B8DCEA600D96D65 /* ArtistViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */; };
 		CA1406611B8DCECD00D96D65 /* ArtistCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1406601B8DCECD00D96D65 /* ArtistCell.swift */; };
+		CA18A5901C3E780B002D9B75 /* RotateNavigationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA18A58F1C3E780B002D9B75 /* RotateNavigationViewController.swift */; };
 		CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */; };
 		CABB848F1BA69BC5000352BE /* LocalMusicPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */; };
 		CABB84911BA6BAA2000352BE /* NSNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABB84901BA6BAA2000352BE /* NSNotificationCenter.swift */; };
@@ -65,6 +66,7 @@
 		CA14065C1B8DCE9900D96D65 /* ArtistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistViewController.swift; sourceTree = "<group>"; };
 		CA14065E1B8DCEA600D96D65 /* ArtistViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ArtistViewController.storyboard; sourceTree = "<group>"; };
 		CA1406601B8DCECD00D96D65 /* ArtistCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistCell.swift; sourceTree = "<group>"; };
+		CA18A58F1C3E780B002D9B75 /* RotateNavigationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotateNavigationViewController.swift; sourceTree = "<group>"; };
 		CABB84511B9F055B000352BE /* TrackPlayAllCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackPlayAllCell.swift; sourceTree = "<group>"; };
 		CABB848E1BA69BC5000352BE /* LocalMusicPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalMusicPlayer.swift; sourceTree = "<group>"; };
 		CABB84901BA6BAA2000352BE /* NSNotificationCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSNotificationCenter.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			children = (
 				CA07E43F1B8165BC00FB25B4 /* AppDelegate.swift */,
 				CABB84981BA7E7BC000352BE /* BaseViewController.swift */,
+				CA18A58F1C3E780B002D9B75 /* RotateNavigationViewController.swift */,
 				CA1406481B8D98BF00D96D65 /* SelectViewController.swift */,
 				CA07E4431B8165BC00FB25B4 /* TopViewController.storyboard */,
 				CA14064C1B8DA81E00D96D65 /* PlaylistsViewController.swift */,
@@ -252,6 +255,7 @@
 				CA1406491B8D98BF00D96D65 /* SelectViewController.swift in Sources */,
 				CABB84521B9F055B000352BE /* TrackPlayAllCell.swift in Sources */,
 				CA14065B1B8DC01E00D96D65 /* AlbumCell.swift in Sources */,
+				CA18A5901C3E780B002D9B75 /* RotateNavigationViewController.swift in Sources */,
 				CA07E4601B816F7C00FB25B4 /* TrackCell.swift in Sources */,
 				CA14065D1B8DCE9900D96D65 /* ArtistViewController.swift in Sources */,
 			);

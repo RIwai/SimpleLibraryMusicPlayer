@@ -106,6 +106,10 @@ class PlayerViewController: UIViewController {
     override func prefersStatusBarHidden() -> Bool {
         return self.fullScreenVideoConinerViewController != nil
     }
+
+    override func shouldAutorotate() -> Bool {
+        return false
+    }
     
     // MARK: - Action methods
     @IBAction func tapCloseButton(sender: AnyObject) {
@@ -420,6 +424,8 @@ class PlayerViewController: UIViewController {
         fullScreenVideoConinerViewController.setVideoView(avPlayerView)
 
         self.setNeedsStatusBarAppearanceUpdate()
+        UIApplication.sharedApplication().setStatusBarOrientation( isLandscapeLeft ? .LandscapeRight : .LandscapeLeft,
+            animated: true)
         
         UIView.animateWithDuration(0.3, animations: { () -> Void in
             fullScreenBaseView.backgroundColor = UIColor.blackColor()
@@ -444,6 +450,8 @@ class PlayerViewController: UIViewController {
 
         fullScreenVideoConinerViewController.videoControllerHidden()
 
+        UIApplication.sharedApplication().setStatusBarOrientation( .Portrait, animated: true)
+        
         UIView.animateWithDuration(0.3, animations: { () -> Void in
             fullScreenBaseView.backgroundColor = UIColor.clearColor()
             fullScreenVideoConinerViewController.view.transform = CGAffineTransformIdentity
