@@ -42,7 +42,7 @@ class PlayerButtonView: UIView {
     }
 
     // MARK: - Notification handler
-    func playbackStatusDidChange() {
+    @objc func playbackStatusDidChange() {
         self.toggleButtonImage()
     }
     

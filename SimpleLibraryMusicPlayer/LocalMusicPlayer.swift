@@ -665,7 +665,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     // MARK: - Notification Handler
-    func didPlayToEndTime() {
+    @objc func didPlayToEndTime() {
         if let player = self.currentPlayer {
             if player.rate != 1 && self.isPlaying {
                 self.pause()
@@ -700,7 +700,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     // MARK: - For MPNowPlayingInfoCenter
-    func playbackInfoToNowPlayingInfoCenter() {
+    @objc func playbackInfoToNowPlayingInfoCenter() {
         guard let mediaItem = self.currentTrack() else { return }
         var playingInfo: [String: Any] = [
             MPMediaItemPropertyTitle: mediaItem.title ?? "",
@@ -725,7 +725,7 @@ class LocalMusicPlayer: NSObject {
     }
 
     // MARK: - For AVAudioSessionInterruptionNotification
-    func audioSessionInterruption(notification: NSNotification) {
+    @objc func audioSessionInterruption(notification: NSNotification) {
         guard let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
         guard let type = AVAudioSessionInterruptionType(rawValue: interruptionType.uintValue) else { return }
         switch type {
@@ -743,7 +743,7 @@ class LocalMusicPlayer: NSObject {
     }
 
     // MARK: - For AVAudioSessionRouteChangeNotification
-    func audioSessionRouteChange(notification: NSNotification) {
+    @objc func audioSessionRouteChange(notification: NSNotification) {
         if let changeReason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? NSNumber {
             if let reason = AVAudioSessionRouteChangeReason(rawValue: changeReason.uintValue) {
                 switch reason {
@@ -772,15 +772,15 @@ class LocalMusicPlayer: NSObject {
     }
     
     // MARK: - Remote Command Handler
-    func remoteCommandPlay() {
+    @objc func remoteCommandPlay() {
         self.play()
     }
     
-    func remoteCommandPause() {
+    @objc func remoteCommandPause() {
         self.pause()
     }
     
-    func remoteCommandPlayOrPause() {
+    @objc func remoteCommandPlayOrPause() {
         if self.isPlaying {
             self.pause()
         } else {
@@ -788,35 +788,35 @@ class LocalMusicPlayer: NSObject {
         }
     }
     
-    func remoteCommandStop() {
+    @objc func remoteCommandStop() {
         self.pause()
     }
     
-    func remoteCommandNext() {
+    @objc func remoteCommandNext() {
         self.skipToNext()
     }
     
-    func remoteCommandPrevious() {
+    @objc func remoteCommandPrevious() {
         self.skipToPrevisu()
     }
 
-    func remoteCommandseekForward(event: MPSeekCommandEvent) {
+    @objc func remoteCommandseekForward(event: MPSeekCommandEvent) {
         self.seekForward(begin: event.type == .beginSeeking)
     }
     
-    func remoteCommandseekBackward(event: MPSeekCommandEvent) {
+    @objc func remoteCommandseekBackward(event: MPSeekCommandEvent) {
         self.seekBackward(begin: event.type == .beginSeeking)
     }
     
     // MARK: - For Background task
-    func willResignActive(notification: NSNotification) {
+    @objc func willResignActive(notification: NSNotification) {
         self.backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(expirationHandler: { () -> Void in
             UIApplication.shared.endBackgroundTask(self.backgroundTaskIdentifier)
             self.backgroundTaskIdentifier = UIBackgroundTaskInvalid
         })
     }
 
-    func didBecomeActive(notification: NSNotification) {
+    @objc func didBecomeActive(notification: NSNotification) {
         UIApplication.shared.endBackgroundTask(self.backgroundTaskIdentifier)
     }
 }

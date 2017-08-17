@@ -191,14 +191,14 @@ class PlayerViewController: UIViewController {
     }
     
     // MARK: - Player notification handler
-    dynamic func playbackStatusDidChange() {
+    @objc dynamic func playbackStatusDidChange() {
         DispatchQueue.main.async {
             self.togglePlayButton()
             self.playbackTimeTimer()
         }
     }
 
-    dynamic func playingItemDidChange() {
+    @objc dynamic func playingItemDidChange() {
         DispatchQueue.main.async {
             if let currentMediaItem = LocalMusicPlayer.sharedPlayer.currentTrack() {
                 self.setupUIPartsWithMediaItem(meidaItem: currentMediaItem)
@@ -206,7 +206,7 @@ class PlayerViewController: UIViewController {
         }
     }
     
-    dynamic func noPlayableTrack() {
+    @objc dynamic func noPlayableTrack() {
         DispatchQueue.main.async {
             if LocalMusicPlayer.sharedPlayer.currentTrack() == nil {
                 self.dismiss(animated: true, completion: nil)
@@ -214,7 +214,7 @@ class PlayerViewController: UIViewController {
         }
     }
 
-    dynamic func remoteSeekBegan() {
+    @objc dynamic func remoteSeekBegan() {
         DispatchQueue.main.async {
             if self.timer == nil {
                 self.timer = Timer.scheduledTimer(timeInterval: 0.2, target: self, selector: #selector(PlayerViewController.playbackTimer), userInfo: nil, repeats: true)
@@ -222,7 +222,7 @@ class PlayerViewController: UIViewController {
         }
     }
 
-    dynamic func remoteSeekEnded() {
+    @objc dynamic func remoteSeekEnded() {
         DispatchQueue.main.async {
             if let timer = self.timer {
                 timer.invalidate()
@@ -236,7 +236,7 @@ class PlayerViewController: UIViewController {
     }
     
     // MARK: - Video
-    dynamic func playVideo(notfication: NSNotification) {
+    @objc dynamic func playVideo(notfication: NSNotification) {
         guard let player = notfication.userInfo?["player"] as? AVPlayer else{
             return
         }
@@ -245,7 +245,7 @@ class PlayerViewController: UIViewController {
     }
     
     // MARK: - Device Roate
-    dynamic func rotateChanged() {
+    @objc dynamic func rotateChanged() {
         if !self.isVideoPlay() {
             return
         }
@@ -263,7 +263,7 @@ class PlayerViewController: UIViewController {
     }
     
     // MARK: - Timer method
-    func playbackTimer() {
+    @objc func playbackTimer() {
         self.currentTimeLabel.text = Util.timeString(secondTimes: LocalMusicPlayer.sharedPlayer.currentTime())
         self.seekSlider.setValue(Float(LocalMusicPlayer.sharedPlayer.currentTime()), animated: true)
     }

@@ -35,7 +35,7 @@ class AVPlayerView: UIView {
         guard let layer = self.layer as? AVPlayerLayer else {
             return
         }
-        layer.videoGravity = AVLayerVideoGravityResizeAspect
+        layer.videoGravity = AVLayerVideoGravity.resizeAspect
         layer.player = avplayer
 
         NotificationCenter.addObserver(observer: self, selector: #selector(AVPlayerView.willResignActive), name: NSNotification.Name.UIApplicationWillResignActive.rawValue, object: nil)
@@ -43,14 +43,14 @@ class AVPlayerView: UIView {
     }
 
     // MARK: For Background
-    func willResignActive(notification: NSNotification) {
+    @objc func willResignActive(notification: NSNotification) {
         guard let layer = self.layer as? AVPlayerLayer else {
             return
         }
         layer.player = nil
     }
 
-    func didBecomeActive(notification: NSNotification) {
+    @objc func didBecomeActive(notification: NSNotification) {
         guard let layer = self.layer as? AVPlayerLayer else {
             return
         }

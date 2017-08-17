@@ -70,7 +70,7 @@ class FullScreenVideoConinerViewController: UIViewController {
         return
     }
 
-    func tapVideoView() {
+    @objc func tapVideoView() {
         let alpha: CGFloat = self.videoControllerView.alpha == 1 ? 0 : 1
         UIView.animate(withDuration: 0.25) { () -> Void in
             self.videoControllerView.alpha = alpha
@@ -80,7 +80,7 @@ class FullScreenVideoConinerViewController: UIViewController {
         }
     }
 
-    func videoControllerHidden() {
+    @objc func videoControllerHidden() {
         if self.videoControllerView.alpha == 0 {
             return
         }

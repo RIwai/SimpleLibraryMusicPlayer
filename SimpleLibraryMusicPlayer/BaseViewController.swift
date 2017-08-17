@@ -43,7 +43,7 @@ class BaseViewController: UIViewController {
     }
     
     // MARK: - Notification handler
-    func showPlayer() {
+    @objc func showPlayer() {
         let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
 
         if let topViewController = self.navigationController?.topViewController {
@@ -53,11 +53,11 @@ class BaseViewController: UIViewController {
         }
     }
 
-    func playbackStatusDidChange() {
+    @objc func playbackStatusDidChange() {
         self.updateCells()
     }
 
-    func playingItemDidChange() {
+    @objc func playingItemDidChange() {
         self.updateCells()
     }
 }
