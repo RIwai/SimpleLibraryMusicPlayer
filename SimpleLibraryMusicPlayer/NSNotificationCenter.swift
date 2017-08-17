@@ -1,5 +1,5 @@
 //
-//  NSNotificationCenter.swift
+//  NotificationCenter.swift
 //  SimpleLibraryMusicPlayer
 //
 //  Created by Ryota Iwai on 2015/09/14.
@@ -8,62 +8,62 @@
 
 import Foundation
 
-@objc public enum NCEventKey: Int {
-    case LocalMusicStarted
-    case LocalMusicPaused
-    case LocalMusicTrackDidChange
-    case LocalMusicNoPlayableTrack
-    case LocalMusicSeekByRemoteBegan
-    case LocalMusicSeekByRemoteEnded
-    case ShowPlayer
-    case PlayVideo
+public enum NCEventKey: Int {
+    case localMusicStarted
+    case localMusicPaused
+    case localMusicTrackDidChange
+    case localMusicNoPlayableTrack
+    case localMusicSeekByRemoteBegan
+    case localMusicSeekByRemoteEnded
+    case showPlayer
+    case playVideo
     
     var name: String {
         get {
             switch self {
-            case LocalMusicStarted: return "LocalMusicStarted"
-            case LocalMusicPaused: return "LocalMusicPaused"
-            case LocalMusicTrackDidChange: return "LocalMusicTrackDidChange"
-            case LocalMusicNoPlayableTrack: return "LocalMusicNoPlayableTrack"
-            case LocalMusicSeekByRemoteBegan: return "LocalMusicSeekByRemoteBegan"
-            case LocalMusicSeekByRemoteEnded: return "LocalMusicSeekByRemoteEnded"
-            case ShowPlayer: return "ShowPlayer"
-            case PlayVideo: return "PlayVideo"
+            case .localMusicStarted: return "LocalMusicStarted"
+            case .localMusicPaused: return "LocalMusicPaused"
+            case .localMusicTrackDidChange: return "LocalMusicTrackDidChange"
+            case .localMusicNoPlayableTrack: return "localMusicNoPlayableTrack"
+            case .localMusicSeekByRemoteBegan: return "localMusicSeekByRemoteBegan"
+            case .localMusicSeekByRemoteEnded: return "localMusicSeekByRemoteEnded"
+            case .showPlayer: return "ShowPlayer"
+            case .playVideo: return "playVideo"
             }
         }
     }
 }
 
-public extension NSNotificationCenter {
+public extension NotificationCenter {
 
     // MARK: Add
     class func addObserver(observer: AnyObject, selector: Selector, event: NCEventKey, object: AnyObject?) {
-        self.defaultCenter().addObserver(observer, selector: selector, name: event.name, object: object)
+        self.default.addObserver(observer, selector: selector, name: NSNotification.Name(rawValue: event.name), object: object)
     }
 
     class func addObserver(observer: AnyObject, selector aSelector: Selector, name aName: String?, object anObject: AnyObject?) {
-        self.defaultCenter().addObserver(observer, selector: aSelector, name: aName, object: anObject)
+        self.default.addObserver(observer, selector: aSelector, name: aName.map { NSNotification.Name(rawValue: $0) }, object: anObject)
     }
 
     // MARK: Remove
     class func removeObserver(observer: AnyObject, event: NCEventKey, object: AnyObject?) {
-        self.defaultCenter().removeObserver(observer, name: event.name, object: object)
+        self.default.removeObserver(observer, name: NSNotification.Name(rawValue: event.name), object: object)
     }
 
     class func removeObserver(observer: AnyObject, name aName: String?, object anObject: AnyObject?) {
-        self.defaultCenter().removeObserver(observer, name: aName, object: anObject)
+        self.default.removeObserver(observer, name: aName.map { NSNotification.Name(rawValue: $0) }, object: anObject)
     }
 
     class func removeObserver(observer: AnyObject) {
-        self.defaultCenter().removeObserver(observer)
+        self.default.removeObserver(observer)
     }
 
     // MARK: Post
-    class func postNotificationEvent(event: NCEventKey, object: AnyObject?) {
-        self.defaultCenter().postNotificationName(event.name, object: object)
+    class func postNotificationEvent(event: NCEventKey, object: Any?) {
+        self.default.post(name: NSNotification.Name(rawValue: event.name), object: object)
     }
 
-    class func postNotificationEvent(event: NCEventKey, object: AnyObject?, userInfo: [NSObject: AnyObject]?) {
-        self.defaultCenter().postNotificationName(event.name, object: object, userInfo: userInfo)
+    class func postNotificationEvent(event: NCEventKey, object: Any?, userInfo: [AnyHashable: Any]?) {
+        self.default.post(name: NSNotification.Name(rawValue: event.name), object: object, userInfo: userInfo)
     }
 }

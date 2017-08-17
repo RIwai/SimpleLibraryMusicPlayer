@@ -42,17 +42,17 @@ class LocalMusicPlayer: NSObject {
         didSet {
             if self.shuffleMode == .On {
                 if oldValue == .Off {
-                    self.currentQueueToShuffle(true)
+                    self.currentQueueToShuffle(shuffle: true)
                 }
             } else {
-                self.currentQueueToShuffle(false)
+                self.currentQueueToShuffle(shuffle: false)
             }
         }
     }
     
     // MARK: Private property
     private var currentPlayer: AVPlayer?
-    private var remoteSeekTimer: NSTimer? = nil
+    private var remoteSeekTimer: Timer? = nil
     private var sourceType: LocalTrackSouceType = .Unkown
     private var currentCollection: MPMediaItemCollection?
     private var currentPlayList: MPMediaPlaylist?
@@ -76,27 +76,27 @@ class LocalMusicPlayer: NSObject {
         self.addRemoteCommand()
         
         // For NowPlaying Center
-        NSNotificationCenter.addObserver(self, selector: "playbackInfoToNowPlayingInfoCenter", name: UIApplicationDidEnterBackgroundNotification, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.playbackInfoToNowPlayingInfoCenter), name: NSNotification.Name.UIApplicationDidEnterBackground.rawValue, object: nil)
         
         // For Interruption 
-        NSNotificationCenter.addObserver(self, selector: "audioSessionInterruption:", name: AVAudioSessionInterruptionNotification, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.audioSessionInterruption), name: NSNotification.Name.AVAudioSessionInterruption.rawValue, object: nil)
 
         // For Audio route change
-        NSNotificationCenter.addObserver(self, selector: "audioSessionRouteChange:", name: AVAudioSessionRouteChangeNotification, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.audioSessionRouteChange), name: NSNotification.Name.AVAudioSessionRouteChange.rawValue, object: nil)
         
         // For background task
-        NSNotificationCenter.addObserver(self, selector: "willResignActive:", name: UIApplicationWillResignActiveNotification, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "didBecomeActive:", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.willResignActive), name: NSNotification.Name.UIApplicationWillResignActive.rawValue, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.didBecomeActive), name: NSNotification.Name.UIApplicationDidBecomeActive.rawValue, object: nil)
     }
     
     deinit {
         self.removePlayer()
         
-        NSNotificationCenter.removeObserver(self, name: UIApplicationDidEnterBackgroundNotification, object: nil)
-        NSNotificationCenter.removeObserver(self, name: AVAudioSessionInterruptionNotification, object: nil)
-        NSNotificationCenter.removeObserver(self, name: AVAudioSessionRouteChangeNotification, object: nil)
-        NSNotificationCenter.removeObserver(self, name: UIApplicationWillResignActiveNotification, object: nil)
-        NSNotificationCenter.removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.UIApplicationDidEnterBackground.rawValue, object: nil)
+        NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.AVAudioSessionInterruption.rawValue, object: nil)
+        NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.AVAudioSessionRouteChange.rawValue, object: nil)
+        NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.UIApplicationWillResignActive.rawValue, object: nil)
+        NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.UIApplicationDidBecomeActive.rawValue, object: nil)
     }
     
     // MARK: - Internal methods
@@ -113,7 +113,7 @@ class LocalMusicPlayer: NSObject {
             
             self.player().play()
             
-            NSNotificationCenter.postNotificationEvent(.LocalMusicStarted, object: self)
+            NotificationCenter.postNotificationEvent(event: .localMusicStarted, object: self)
             
             self.playbackInfoToNowPlayingInfoCenter()
         } else {
@@ -122,7 +122,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     func playWithPlaylist(playlist: MPMediaPlaylist, selectTrackIndex: Int) -> Bool {
-        if self.hasPlayableItem(playlist.items) == false {
+        if self.hasPlayableItem(items: playlist.items) == false {
             return false
         }
         
@@ -133,13 +133,13 @@ class LocalMusicPlayer: NSObject {
         self.sourceType = .Playlist
         self.currentPlayList = playlist
         self.currentCollection = nil
-        self.setItemsToPlayer(playlist.items, index: selectTrackIndex)
+        self.setItemsToPlayer(items: playlist.items, index: selectTrackIndex)
         
         return true
     }
     
     func playWithCollection(collection: MPMediaItemCollection, selectTrackIndex: Int, type: LocalTrackSouceType) -> Bool {
-        if self.hasPlayableItem(collection.items) == false {
+        if self.hasPlayableItem(items: collection.items) == false {
             return false
         }
         if self.playBackStatusIsPlaying() {
@@ -149,7 +149,7 @@ class LocalMusicPlayer: NSObject {
         self.sourceType = type
         self.currentCollection = collection
         self.currentPlayList = nil
-        self.setItemsToPlayer(collection.items, index: selectTrackIndex)
+        self.setItemsToPlayer(items: collection.items, index: selectTrackIndex)
         
         return true
     }
@@ -165,7 +165,7 @@ class LocalMusicPlayer: NSObject {
         self.sourceType = type
         self.currentCollection = MPMediaItemCollection(items: [meidaItem])
         self.currentPlayList = nil
-        self.setItemsToPlayer([meidaItem], index: 0)
+        self.setItemsToPlayer(items: [meidaItem], index: 0)
         
         return false
     }
@@ -176,30 +176,30 @@ class LocalMusicPlayer: NSObject {
         
         self.player().pause()
         
-        NSNotificationCenter.postNotificationEvent(.LocalMusicPaused, object: self)
+        NotificationCenter.postNotificationEvent(event: .localMusicPaused, object: self)
         
         self.playbackInfoToNowPlayingInfoCenter()
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+        DispatchQueue.global().async {
             do {
                 try AVAudioSession.sharedInstance().setActive(false)
             } catch {
                 // Do nothing
             }
-        })
+        }
     }
     
     // MARK: Skip
     func skipToNext() {
         if let nextTrack = self.nextTrack() {
-            if self.replaceTrack(nextTrack) {
+            if self.replaceTrack(item: nextTrack) {
                 self.currentQueueIndex = self.nextIndex()
             } else {
-                let playableIndex = self.searchPlayableTrackIndex(true)
+                let playableIndex = self.searchPlayableTrackIndex(ascending: true)
                 if playableIndex == NSNotFound {
                     return
                 }
-                if self.replaceTrack(self.localTracksQueue[playableIndex]) {
+                if self.replaceTrack(item: self.localTracksQueue[playableIndex]) {
                     self.currentQueueIndex = playableIndex
                 }
             }
@@ -208,14 +208,14 @@ class LocalMusicPlayer: NSObject {
     
     func skipToPrevisu() {
         if let previousTrack = self.previousTrack() {
-            if self.replaceTrack(previousTrack) {
+            if self.replaceTrack(item: previousTrack) {
                 self.currentQueueIndex = self.previousIndex()
             } else {
-                let playableIndex = self.searchPlayableTrackIndex(false)
+                let playableIndex = self.searchPlayableTrackIndex(ascending: false)
                 if playableIndex == NSNotFound {
                     return
                 }
-                if self.replaceTrack(self.localTracksQueue[playableIndex]) {
+                if self.replaceTrack(item: self.localTracksQueue[playableIndex]) {
                     self.currentQueueIndex = playableIndex
                 }
             }
@@ -236,7 +236,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     // MARK: Seek
-    func seekToTime(targetTime: NSTimeInterval, completion: (() -> Void)?) {
+    func seekToTime(targetTime: TimeInterval, completion: (() -> Void)?) {
         if self.currentTime() == targetTime {
             completion?()
             return
@@ -247,13 +247,13 @@ class LocalMusicPlayer: NSObject {
         if targetTime != 0 {
             seekTime = CMTimeMakeWithSeconds(Float64(targetTime), currentItem.asset.duration.timescale)
         }
-        currentItem.seekToTime(seekTime, completionHandler: { (finished) -> Void in
+        currentItem.seek(to: seekTime, completionHandler: { (finished) -> Void in
             completion?()
             self.updatePlaybackTimeToNowPlayingInfoCenter()
         })
     }
     
-    func seekForward(begin begin :Bool) {
+    func seekForward(begin :Bool) {
         if self.isPlaying {
             if let player = self.currentPlayer {
                 player.rate = begin ? 6 : 1
@@ -268,7 +268,7 @@ class LocalMusicPlayer: NSObject {
         }
     }
     
-    func seekBackward(begin begin :Bool) {
+    func seekBackward(begin :Bool) {
         if self.isPlaying {
             if let player = self.currentPlayer {
                 player.rate = begin ? -6 : 1
@@ -283,15 +283,15 @@ class LocalMusicPlayer: NSObject {
         }
     }
 
-    func startSeekTimer(forward forward : Bool) {
+    func startSeekTimer(forward : Bool) {
         if self.remoteSeekTimer == nil {
-            self.remoteSeekTimer = NSTimer.scheduledTimerWithTimeInterval(0.2,
+            self.remoteSeekTimer = Timer.scheduledTimer(timeInterval: 0.2,
                 target: self,
-                selector: "remoteSeek:",
+                selector: Selector(("remoteSeek:")),
                 userInfo: ["Forward": forward],
                 repeats: true)
             
-            NSNotificationCenter.postNotificationEvent(.LocalMusicSeekByRemoteBegan, object: nil)
+            NotificationCenter.postNotificationEvent(event: .localMusicSeekByRemoteBegan, object: nil)
         }
     }
     
@@ -299,12 +299,14 @@ class LocalMusicPlayer: NSObject {
         if self.remoteSeekTimer != nil {
             self.remoteSeekTimer?.invalidate()
             self.remoteSeekTimer = nil
-            NSNotificationCenter.postNotificationEvent(.LocalMusicSeekByRemoteEnded, object: nil)
+            NotificationCenter.postNotificationEvent(event: .localMusicSeekByRemoteEnded, object: nil)
         }
     }
     
-    func remoteSeek(timer: NSTimer) {
-        if let isForward = timer.userInfo?["Forward"] as? Bool {
+    func remoteSeek(timer: Timer) {
+        if let useInfo = timer.userInfo as? [String: Any],
+            let isForward = useInfo["Forward"] as? Bool {
+
             var currentTime = self.currentTime()
             if isForward {
                 currentTime += 2
@@ -317,13 +319,13 @@ class LocalMusicPlayer: NSObject {
                     currentTime = 0
                 }
             }
-            self.seekToTime(currentTime, completion: nil)
+            self.seekToTime(targetTime: currentTime, completion: nil)
         }
     }
     
     // MARK: Status
     func playBackStatusIsPlaying() -> Bool {
-        if self.player().status == .ReadyToPlay && self.isPlaying == true {
+        if self.player().status == .readyToPlay && self.isPlaying == true {
             return true
         }
         return false
@@ -386,15 +388,15 @@ class LocalMusicPlayer: NSObject {
     func canPlay() -> Bool {
         guard let currentItem = self.player().currentItem else { return false }
         return (self.player().currentItem != nil) &&
-            (currentItem.status == .ReadyToPlay) &&
-            (self.player().status == .ReadyToPlay)
+            (currentItem.status == .readyToPlay) &&
+            (self.player().status == .readyToPlay)
     }
     
-    func currentTime() -> NSTimeInterval {
-        return NSTimeInterval(CMTimeGetSeconds(self.player().currentTime()))
+    func currentTime() -> TimeInterval {
+        return TimeInterval(CMTimeGetSeconds(self.player().currentTime()))
     }
     
-    func currentTrackPlaybackDuration() -> NSTimeInterval {
+    func currentTrackPlaybackDuration() -> TimeInterval {
         if let currentTrack = self.currentTrack() {
             return currentTrack.playbackDuration
         }
@@ -430,7 +432,7 @@ class LocalMusicPlayer: NSObject {
     
     func isCurrentTrackVideo() -> Bool {
         if let currentTrack = self.currentTrack() {
-            return self.isVideoType(currentTrack)
+            return self.isVideoType(item: currentTrack)
         }
         return false
     }
@@ -453,11 +455,11 @@ class LocalMusicPlayer: NSObject {
         
         // AVPlayer proerty
         self.player().allowsExternalPlayback = false
-        self.player().actionAtItemEnd = .None
+        self.player().actionAtItemEnd = .none
         self.player().rate = 0
         
         // Status KVO
-        self.player().addObserver(self, forKeyPath: "status", options: .New, context: nil)
+        self.player().addObserver(self, forKeyPath: "status", options: .new, context: nil)
     }
     
     private func removePlayer() {
@@ -470,8 +472,8 @@ class LocalMusicPlayer: NSObject {
         self.currentPlayer?.removeObserver(self, forKeyPath: "status")
         if let currentPlyaerItem = self.currentPlayer?.currentItem {
             currentPlyaerItem.removeObserver(self, forKeyPath: "status")
-            NSNotificationCenter.removeObserver(self, name: AVPlayerItemDidPlayToEndTimeNotification, object: currentPlyaerItem)
-            self.currentPlayer?.replaceCurrentItemWithPlayerItem(nil)
+            NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime.rawValue, object: currentPlyaerItem)
+            self.currentPlayer?.replaceCurrentItem(with: nil)
         }
         self.currentPlayer = nil
     }
@@ -480,15 +482,15 @@ class LocalMusicPlayer: NSObject {
         if let unwrapedPlayer = self.currentPlayer {
             return unwrapedPlayer
         }
-        self.createPlayer(nil)
+        self.createPlayer(item: nil)
         return self.currentPlayer!
     }
     
     // MARK: PlayerItem
     private func playerItem(asset: AVURLAsset) -> AVPlayerItem {
         let playerItem = AVPlayerItem(asset: asset)
-        playerItem.addObserver(self, forKeyPath: "status", options: /*.Initial |*/ .New, context: nil)
-        NSNotificationCenter.addObserver(self, selector: "didPlayToEndTime", name: AVPlayerItemDidPlayToEndTimeNotification, object: playerItem)
+        playerItem.addObserver(self, forKeyPath: "status", options: /*.Initial |*/ .new, context: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(LocalMusicPlayer.didPlayToEndTime), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime.rawValue, object: playerItem)
         
         return playerItem
     }
@@ -503,45 +505,45 @@ class LocalMusicPlayer: NSObject {
         self.localTracksQueue = items
         if selectedIndex < 0 {
             if self.shuffleMode == .On {
-                currentQueueToShuffle(true)
+                currentQueueToShuffle(shuffle: true)
             }
             selectedIndex = 0
         }
-        if self.replaceTrack(self.localTracksQueue[selectedIndex]) {
+        if self.replaceTrack(item: self.localTracksQueue[selectedIndex]) {
             self.currentQueueIndex = selectedIndex
         } else {
-            let playableIndex = self.searchPlayableTrackIndex(true)
+            let playableIndex = self.searchPlayableTrackIndex(ascending: true)
             if playableIndex == NSNotFound {
                 return
             }
-            if self.replaceTrack(self.localTracksQueue[playableIndex]) {
+            if self.replaceTrack(item: self.localTracksQueue[playableIndex]) {
                 self.currentQueueIndex = playableIndex
             }
         }
         
         if index >= 0 && self.shuffleMode == .On {
-            currentQueueToShuffle(true)
+            currentQueueToShuffle(shuffle: true)
         }
     }
     
     private func replaceTrack(item: MPMediaItem) -> Bool {
         if let itemURL = item.assetURL {
-            let urlAsset = AVURLAsset(URL: itemURL, options: nil)
-            urlAsset.loadValuesAsynchronouslyForKeys(["tracks","duration","playable"], completionHandler: { () -> Void in
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            let urlAsset = AVURLAsset(url: itemURL)
+            urlAsset.loadValuesAsynchronously(forKeys: ["tracks","duration","playable"], completionHandler: {
+                DispatchQueue.main.async {
                     self.removePlayer()
-                    self.createPlayer(self.playerItem(urlAsset))
-                    NSNotificationCenter.postNotificationEvent(.LocalMusicTrackDidChange, object: self)
-                    if self.isVideoType(item) {
-                        NSNotificationCenter.postNotificationEvent(.PlayVideo, object: nil, userInfo: ["player": self.player()])
+                    self.createPlayer(item: self.playerItem(asset: urlAsset))
+                    NotificationCenter.postNotificationEvent(event: .localMusicTrackDidChange, object: self)
+                    if self.isVideoType(item: item) {
+                        NotificationCenter.postNotificationEvent(event: .playVideo, object: nil, userInfo: ["player": self.player()])
                     }
-                    if self.player().status == .ReadyToPlay {
+                    if self.player().status == .readyToPlay {
                         self.watitingForPlay = false
                         self.play()
                     } else {
                         self.watitingForPlay = true
                     }
-                })
+                }
             })
             return true
         }
@@ -550,7 +552,7 @@ class LocalMusicPlayer: NSObject {
     }
     
     private func isVideoType(item: MPMediaItem) -> Bool {
-        if item.mediaType.intersect(.AnyVideo).rawValue != 0 {
+        if item.mediaType.intersection(.anyVideo).rawValue != 0 {
             return true
         }
         return false
@@ -562,26 +564,26 @@ class LocalMusicPlayer: NSObject {
             startIndex = 0
         }
         if ascending {
-            for var index = startIndex ; index < self.localTracksQueue.count ; index++ {
+            for index in startIndex ..< self.localTracksQueue.count {
                 if self.localTracksQueue[index].assetURL != nil {
                     return index
                 }
             }
             if self.currentQueueIndex != 0 {
-                for var index = 0 ; index < self.currentQueueIndex ; index++ {
+                for index in 0 ..< self.currentQueueIndex {
                     if self.localTracksQueue[index].assetURL != nil {
                         return index
                     }
                 }
             }
         } else {
-            for var index = startIndex ; index >= 0 ; index-- {
+            for index in (0 ..< startIndex) .reversed() {
                 if self.localTracksQueue[index].assetURL != nil {
                     return index
                 }
             }
             if self.currentQueueIndex != (self.localTracksQueue.count - 1) {
-                for var index = self.localTracksQueue.count - 1 ; index > self.currentQueueIndex ; index-- {
+                for index in ((self.currentQueueIndex + 1) ..< (self.localTracksQueue.count - 1)).reversed() {
                     if self.localTracksQueue[index].assetURL != nil {
                         return index
                     }
@@ -589,7 +591,7 @@ class LocalMusicPlayer: NSObject {
             }
         }
         
-        NSNotificationCenter.postNotificationEvent(.LocalMusicNoPlayableTrack, object: self)
+        NotificationCenter.postNotificationEvent(event: .localMusicNoPlayableTrack, object: self)
         
         return NSNotFound
     }
@@ -637,7 +639,7 @@ class LocalMusicPlayer: NSObject {
             if self.localTracksQueue.count > 1 {
                 if let currentTrack = self.currentTrack() {
                     self.localTracksQueue.shuffle()
-                    for var newCurrentIndex = 0 ; newCurrentIndex < self.localTracksQueue.count ; newCurrentIndex++ {
+                    for newCurrentIndex in 0 ..< self.localTracksQueue.count {
                         if currentTrack == self.localTracksQueue[newCurrentIndex] {
                             self.currentQueueIndex = newCurrentIndex
                             break
@@ -648,7 +650,7 @@ class LocalMusicPlayer: NSObject {
         } else {
             if let items = self.collection()?.items {
                 if let currentTrack = self.currentTrack() {
-                    for var newCurrentIndex = 0 ; newCurrentIndex < items.count ; newCurrentIndex++ {
+                    for newCurrentIndex in 0 ..< items.count {
                         if currentTrack == items[newCurrentIndex] {
                             self.currentQueueIndex = newCurrentIndex
                             break
@@ -675,17 +677,17 @@ class LocalMusicPlayer: NSObject {
             self.skipToNext()
         } else {
             // Stop
-            self.seekToTime(0, completion: { () -> Void in
+            self.seekToTime(targetTime: 0, completion: { () -> Void in
                 self.pause()
             })
         }
     }
     
     // MARK: - KVO Handler
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "status" {
             if let playerItem = self.player().currentItem {
-                if self.player().status == .ReadyToPlay && playerItem.status == .ReadyToPlay {
+                if self.player().status == .readyToPlay && playerItem.status == .readyToPlay {
                     if self.watitingForPlay {
                         self.play()
                         self.watitingForPlay = false
@@ -693,31 +695,31 @@ class LocalMusicPlayer: NSObject {
                 }
             }
         } else {
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
     // MARK: - For MPNowPlayingInfoCenter
     func playbackInfoToNowPlayingInfoCenter() {
         guard let mediaItem = self.currentTrack() else { return }
-        var playingInfo: [String: AnyObject] = [
+        var playingInfo: [String: Any] = [
             MPMediaItemPropertyTitle: mediaItem.title ?? "",
             MPMediaItemPropertyArtist: mediaItem.artist ?? "",
             MPMediaItemPropertyAlbumTitle: mediaItem.albumTitle ?? "",
-            MPMediaItemPropertyPlaybackDuration: NSNumber(double: self.currentTrackPlaybackDuration()),
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(double: self.currentTime()),
-            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(float: self.player().rate)]
+            MPMediaItemPropertyPlaybackDuration: self.currentTrackPlaybackDuration(),
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: self.currentTime(),
+            MPNowPlayingInfoPropertyPlaybackRate: self.player().rate]
         if mediaItem.artwork != nil {
             playingInfo[MPMediaItemPropertyArtwork] = mediaItem.artwork
         }
-        MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = playingInfo
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = playingInfo
     }
     
     private func updatePlaybackTimeToNowPlayingInfoCenter() {
         if self.currentTrack() != nil {
-            if var playingInfo = MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo {
-                playingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(double: self.currentTime())
-                MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = playingInfo
+            if var playingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo {
+                playingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime()
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = playingInfo
             }
         }
     }
@@ -725,16 +727,16 @@ class LocalMusicPlayer: NSObject {
     // MARK: - For AVAudioSessionInterruptionNotification
     func audioSessionInterruption(notification: NSNotification) {
         guard let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
-        guard let type = AVAudioSessionInterruptionType(rawValue: interruptionType.unsignedLongValue) else { return }
+        guard let type = AVAudioSessionInterruptionType(rawValue: interruptionType.uintValue) else { return }
         switch type {
-        case .Began:
+        case .began:
             if self.isPlaying {
                 self.pause()
             }
             
-        case .Ended:
+        case .ended:
             guard let interruptionOption = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? NSNumber else { return }
-            if interruptionOption.unsignedLongValue == AVAudioSessionInterruptionOptions.ShouldResume.rawValue {
+            if interruptionOption.uintValue == AVAudioSessionInterruptionOptions.shouldResume.rawValue {
                 self.play()
             }            
         }
@@ -743,9 +745,9 @@ class LocalMusicPlayer: NSObject {
     // MARK: - For AVAudioSessionRouteChangeNotification
     func audioSessionRouteChange(notification: NSNotification) {
         if let changeReason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? NSNumber {
-            if let reason = AVAudioSessionRouteChangeReason(rawValue: changeReason.unsignedLongValue) {
+            if let reason = AVAudioSessionRouteChangeReason(rawValue: changeReason.uintValue) {
                 switch reason {
-                case .OldDeviceUnavailable:
+                case .oldDeviceUnavailable:
                     if self.isPlaying {
                         self.pause()
                     }
@@ -759,14 +761,14 @@ class LocalMusicPlayer: NSObject {
     
     // MARK: - RemoteCommand
     private func addRemoteCommand() {
-        MPRemoteCommandCenter.sharedCommandCenter().playCommand.addTarget(self, action: "remoteCommandPlay")
-        MPRemoteCommandCenter.sharedCommandCenter().pauseCommand.addTarget(self, action: "remoteCommandPause")
-        MPRemoteCommandCenter.sharedCommandCenter().togglePlayPauseCommand.addTarget(self, action: "remoteCommandPlayOrPause")
-        MPRemoteCommandCenter.sharedCommandCenter().stopCommand.addTarget(self, action: "remoteCommandStop")
-        MPRemoteCommandCenter.sharedCommandCenter().nextTrackCommand.addTarget(self, action: "remoteCommandNext")
-        MPRemoteCommandCenter.sharedCommandCenter().previousTrackCommand.addTarget(self, action: "remoteCommandPrevious")
-        MPRemoteCommandCenter.sharedCommandCenter().seekForwardCommand.addTarget(self, action: "remoteCommandseekForward:")
-        MPRemoteCommandCenter.sharedCommandCenter().seekBackwardCommand.addTarget(self, action: "remoteCommandseekBackward:")
+        MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandPlay))
+        MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandPause))
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandPlayOrPause))
+        MPRemoteCommandCenter.shared().stopCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandStop))
+        MPRemoteCommandCenter.shared().nextTrackCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandNext))
+        MPRemoteCommandCenter.shared().previousTrackCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandPrevious))
+        MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandseekForward))
+        MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandseekBackward))
     }
     
     // MARK: - Remote Command Handler
@@ -799,22 +801,22 @@ class LocalMusicPlayer: NSObject {
     }
 
     func remoteCommandseekForward(event: MPSeekCommandEvent) {
-        self.seekForward(begin: event.type == .BeginSeeking)
+        self.seekForward(begin: event.type == .beginSeeking)
     }
     
     func remoteCommandseekBackward(event: MPSeekCommandEvent) {
-        self.seekBackward(begin: event.type == .BeginSeeking)
+        self.seekBackward(begin: event.type == .beginSeeking)
     }
     
     // MARK: - For Background task
     func willResignActive(notification: NSNotification) {
-        self.backgroundTaskIdentifier = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler({ () -> Void in
-            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskIdentifier)
+        self.backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(expirationHandler: { () -> Void in
+            UIApplication.shared.endBackgroundTask(self.backgroundTaskIdentifier)
             self.backgroundTaskIdentifier = UIBackgroundTaskInvalid
         })
     }
 
     func didBecomeActive(notification: NSNotification) {
-        UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskIdentifier)
+        UIApplication.shared.endBackgroundTask(self.backgroundTaskIdentifier)
     }
 }

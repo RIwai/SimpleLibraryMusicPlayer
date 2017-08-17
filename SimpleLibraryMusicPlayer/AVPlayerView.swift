@@ -14,16 +14,16 @@ class AVPlayerView: UIView {
     
     // MARK: deinit
     deinit {
-        NSNotificationCenter.removeObserver(self)
+        NotificationCenter.removeObserver(observer: self)
     }
 
     // MARK: Override
-    override class func layerClass() -> AnyClass {
+    override class var layerClass: AnyClass {
         return AVPlayerLayer.self
     }
     
-    override func layoutSublayersOfLayer(layer: CALayer) {
-        super.layoutSublayersOfLayer(layer)
+    override func layoutSublayers(of: CALayer) {
+        super.layoutSublayers(of: layer)
         
         if layer == self.layer {
             self.layer.frame = self.bounds
@@ -38,8 +38,8 @@ class AVPlayerView: UIView {
         layer.videoGravity = AVLayerVideoGravityResizeAspect
         layer.player = avplayer
 
-        NSNotificationCenter.addObserver(self, selector: "willResignActive:", name: UIApplicationWillResignActiveNotification, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "didBecomeActive:", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(AVPlayerView.willResignActive), name: NSNotification.Name.UIApplicationWillResignActive.rawValue, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(AVPlayerView.didBecomeActive), name: NSNotification.Name.UIApplicationDidBecomeActive.rawValue, object: nil)
     }
 
     // MARK: For Background

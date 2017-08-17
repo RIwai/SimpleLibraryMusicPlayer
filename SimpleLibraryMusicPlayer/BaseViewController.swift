@@ -11,13 +11,13 @@ import UIKit
 class BaseViewController: UIViewController {
 
     // MARK: - Override method
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        NSNotificationCenter.addObserver(self, selector: "showPlayer", event: .ShowPlayer, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicStarted, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicPaused, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "playingItemDidChange", event: .LocalMusicTrackDidChange, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(BaseViewController.showPlayer), event: .showPlayer, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(BaseViewController.playbackStatusDidChange), event: .localMusicStarted, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(BaseViewController.playbackStatusDidChange), event: .localMusicPaused, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(BaseViewController.playingItemDidChange), event: .localMusicTrackDidChange, object: nil)
         
         if LocalMusicPlayer.sharedPlayer.currentTrack() != nil {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: PlayerButtonView.loadFromNib())
@@ -28,13 +28,13 @@ class BaseViewController: UIViewController {
         self.updateCells()
     }
 
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
-        NSNotificationCenter.removeObserver(self, event: .ShowPlayer, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicStarted, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicPaused, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicTrackDidChange, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .showPlayer, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .localMusicStarted, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .localMusicPaused, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .localMusicTrackDidChange, object: nil)
     }
     
     // MARK: - Internal method
@@ -47,7 +47,7 @@ class BaseViewController: UIViewController {
         let playerViewController = PlayerViewController(nibName: "PlayerViewController", bundle:nil)
 
         if let topViewController = self.navigationController?.topViewController {
-            topViewController.presentViewController(playerViewController,
+            topViewController.present(playerViewController,
                 animated: true,
                 completion: nil)
         }

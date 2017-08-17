@@ -17,21 +17,21 @@ class PlayerButtonView: UIView {
 
     // MARK: - Class method
     class func loadFromNib() -> PlayerButtonView {
-        return UINib(nibName: "PlayerButtonView", bundle: nil).instantiateWithOwner(nil, options: nil).first as! PlayerButtonView
+        return UINib(nibName: "PlayerButtonView", bundle: nil).instantiate(withOwner: nil, options: nil).first as! PlayerButtonView
     }
 
     // MARK: - deinit
     deinit {
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicStarted, object: nil)
-        NSNotificationCenter.removeObserver(self, event: .LocalMusicPaused, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .localMusicStarted, object: nil)
+        NotificationCenter.removeObserver(observer: self, event: .localMusicPaused, object: nil)
     }
     
     // MARK: - Override method
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicStarted, object: nil)
-        NSNotificationCenter.addObserver(self, selector: "playbackStatusDidChange", event: .LocalMusicPaused, object: nil)
+        NotificationCenter.addObserver(observer: self, selector: #selector(PlayerButtonView.playbackStatusDidChange), event: .localMusicStarted, object: nil)
+        NotificationCenter.addObserver(observer:self, selector: #selector(PlayerButtonView.playbackStatusDidChange), event: .localMusicPaused, object: nil)
 
         self.onImagesArray.append(UIImage(named: "on1")!)
         self.onImagesArray.append(UIImage(named: "on2")!)
@@ -49,14 +49,14 @@ class PlayerButtonView: UIView {
     // MARK: - Private method
     private func toggleButtonImage() {
         if LocalMusicPlayer.sharedPlayer.isPlaying {
-            if !self.imageView.isAnimating() {
+            if !self.imageView.isAnimating {
                 self.imageView.image = nil
                 self.imageView.animationImages = self.onImagesArray
                 self.imageView.animationDuration = 2
                 self.imageView.startAnimating()
             }
         } else {
-            if self.imageView.isAnimating() {
+            if self.imageView.isAnimating {
                 self.imageView.stopAnimating()
             }
             self.imageView.image = UIImage(named: "off")
@@ -65,6 +65,6 @@ class PlayerButtonView: UIView {
     
     // MARK: - Action method
     @IBAction func tapButton(sender: AnyObject) {
-        NSNotificationCenter.postNotificationEvent(.ShowPlayer, object: nil)
+        NotificationCenter.postNotificationEvent(event: .showPlayer, object: nil)
     }
 }

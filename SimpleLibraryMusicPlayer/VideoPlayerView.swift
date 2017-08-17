@@ -27,7 +27,7 @@ class VideoPlayerView: UIView {
     }
     
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         
         self.appendAVPlayerView()
     }
@@ -42,9 +42,9 @@ class VideoPlayerView: UIView {
     // MARK: Video
     func setVideoPlayer(player: AVPlayer) {
         if self.playerView == nil {
-            self.playerView = AVPlayerView(frame: CGRect(origin: CGPointZero, size: self.frame.size))
+            self.playerView = AVPlayerView(frame: CGRect(origin: CGPoint.zero, size: self.frame.size))
         }
-        self.playerView?.setPlayer(player)
+        self.playerView?.setPlayer(avplayer: player)
     }
 
     // MARK: AVPlayerView
@@ -64,8 +64,8 @@ class VideoPlayerView: UIView {
         if playerView.superview != nil {
             playerView.removeFromSuperview()
         }
-        playerView.backgroundColor = UIColor.clearColor()
-        playerView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        playerView.backgroundColor = UIColor.clear
+        playerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.addSubview(playerView)
     }
 }

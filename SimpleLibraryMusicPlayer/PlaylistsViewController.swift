@@ -15,22 +15,22 @@ class PlaylistsViewController: BaseViewController {
     @IBOutlet weak var tableView: UITableView!
     
     // MARK: - Private property
-    private var playlists: [MPMediaPlaylist] = []
+    fileprivate var playlists: [MPMediaPlaylist] = []
     
     // MARK: - Override methods
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Load playlists
-        let query = MPMediaQuery.playlistsQuery()
+        let query = MPMediaQuery.playlists()
         // Only Media type music
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(value: false), forProperty: MPMediaItemPropertyIsCloudItem))
         self.playlists = query.collections as? [MPMediaPlaylist] ?? []
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         self.updateCells()
@@ -39,12 +39,12 @@ class PlaylistsViewController: BaseViewController {
     override func updateCells() {
         for cell in self.tableView.visibleCells {
             if let playlistCell = cell as? PlaylistCell {
-                if let indexPath = self.tableView.indexPathForCell(playlistCell) {
+                if let indexPath = self.tableView.indexPath(for: playlistCell) {
                     let playlist = self.playlists[indexPath.row]
-                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(playlist) {
+                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(collection: playlist) {
                         playlistCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
                     } else {
-                        playlistCell.contentView.backgroundColor = UIColor.clearColor()
+                        playlistCell.contentView.backgroundColor = UIColor.clear
                     }
                 }
             }
@@ -55,21 +55,21 @@ class PlaylistsViewController: BaseViewController {
 // MARK: - UITableViewDataSource
 extension PlaylistsViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.playlists.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let playlist = self.playlists[indexPath.row]
-        let cell = self.tableView.dequeueReusableCellWithIdentifier("PlaylistCell", forIndexPath: indexPath) as! PlaylistCell
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "PlaylistCell", for: indexPath) as! PlaylistCell
         
         cell.titleLabel.text = playlist.name
         cell.descriptionLabel.text = "  \(playlist.items.count) track(s)"
         
-        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(playlist) {
+        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(collection: playlist) {
             cell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
         } else {
-            cell.contentView.backgroundColor = UIColor.clearColor()
+            cell.contentView.backgroundColor = UIColor.clear
         }
         
         return cell
@@ -79,8 +79,8 @@ extension PlaylistsViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension PlaylistsViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath as IndexPath, animated: true)
         
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
             let playlist = self.playlists[indexPath.row]

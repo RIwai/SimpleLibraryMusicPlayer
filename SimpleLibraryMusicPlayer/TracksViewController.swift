@@ -23,12 +23,12 @@ class TracksViewController: BaseViewController {
     override func updateCells() {
         for cell in self.tableView.visibleCells {
             if let trackCell = cell as? TrackCell {
-                if let indexPath = self.tableView.indexPathForCell(trackCell) {
-                    if let mediaItem = self.mediaItem(indexPath.row - 1) {
-                        if LocalMusicPlayer.sharedPlayer.isCurrentTrack(mediaItem) {
+                if let indexPath = self.tableView.indexPath(for: trackCell) {
+                    if let mediaItem = self.mediaItem(index: indexPath.row - 1) {
+                        if LocalMusicPlayer.sharedPlayer.isCurrentTrack(track: mediaItem) {
                             trackCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
                         } else {
-                            trackCell.contentView.backgroundColor = UIColor.clearColor()
+                            trackCell.contentView.backgroundColor = UIColor.clear
                         }
                     }
                 }
@@ -37,11 +37,11 @@ class TracksViewController: BaseViewController {
     }
 
     // MARK: - Private method
-    private func currentCollection() -> MPMediaItemCollection? {
+    fileprivate func currentCollection() -> MPMediaItemCollection? {
         return self.collection != nil ? self.collection : self.playlist
     }
     
-    private func mediaItem(index: Int) -> MPMediaItem? {
+    fileprivate func mediaItem(index: Int) -> MPMediaItem? {
         if let correction = self.currentCollection() {
             if correction.items.count > index {
                 return correction.items[index]
@@ -54,51 +54,51 @@ class TracksViewController: BaseViewController {
 // MARK: - UITableViewDataSource
 extension TracksViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let correction = self.currentCollection() {
             return correction.count + 1
         }
         return 0
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
-            return self.tableView.dequeueReusableCellWithIdentifier("TrackPlayAllCell", forIndexPath: indexPath) as! TrackPlayAllCell
+            return self.tableView.dequeueReusableCell(withIdentifier: "TrackPlayAllCell", for: indexPath) as! TrackPlayAllCell
         }
         
-        let trackCell = self.tableView.dequeueReusableCellWithIdentifier("TrackCell", forIndexPath: indexPath) as! TrackCell
-        if let mediaItem = self.mediaItem(indexPath.row - 1) {
+        let trackCell = self.tableView.dequeueReusableCell(withIdentifier: "TrackCell", for: indexPath) as! TrackCell
+        if let mediaItem = self.mediaItem(index: indexPath.row - 1) {
             
             trackCell.trackTitle.text = mediaItem.title
             trackCell.artistNameAlbumNameLabel.text = (mediaItem.artist ?? "-") + " | " + (mediaItem.albumTitle ?? "-")
-            trackCell.timeLabel.text = Util.timeString(mediaItem.playbackDuration)
+            trackCell.timeLabel.text = Util.timeString(secondTimes: mediaItem.playbackDuration)
             if let artwork = mediaItem.artwork {
-                let scale = UIScreen.mainScreen().scale
-                trackCell.artworkImageView.image = artwork.imageWithSize(CGSizeMake(80 * scale, 80 * scale))
+                let scale = UIScreen.main.scale
+                trackCell.artworkImageView.image = artwork.image(at: CGSize(width: 80 * scale, height: 80 * scale))
             } else {
                 trackCell.artworkImageView.image = nil
             }
             
-            if mediaItem.cloudItem {
-                trackCell.cloudImageView.hidden = false
-                trackCell.drmLabel.hidden = true
+            if mediaItem.isCloudItem {
+                trackCell.cloudImageView.isHidden = false
+                trackCell.drmLabel.isHidden = true
             } else {
-                trackCell.cloudImageView.hidden = true
+                trackCell.cloudImageView.isHidden = true
                 if mediaItem.assetURL == nil {
-                    trackCell.drmLabel.hidden = false
+                    trackCell.drmLabel.isHidden = false
                 } else {
-                    trackCell.drmLabel.hidden = true
+                    trackCell.drmLabel.isHidden = true
                 }
             }
             
-            if LocalMusicPlayer.sharedPlayer.isCurrentTrack(mediaItem){
+            if LocalMusicPlayer.sharedPlayer.isCurrentTrack(track: mediaItem){
                 trackCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
             } else {
-                trackCell.contentView.backgroundColor = UIColor.clearColor()
+                trackCell.contentView.backgroundColor = UIColor.clear
             }
         }
     
-        if trackCell.cloudImageView.hidden == false || trackCell.drmLabel.hidden == false {
+        if trackCell.cloudImageView.isHidden == false || trackCell.drmLabel.isHidden == false {
            trackCell.contentView.alpha = 0.5
         } else {
             trackCell.contentView.alpha = 1.0
@@ -111,24 +111,24 @@ extension TracksViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension TracksViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath as IndexPath, animated: true)
         
         let selectedIndex = indexPath.row - 1
         if self.sourceType == .Playlist {
             if let playlist = self.playlist {
-                if !LocalMusicPlayer.sharedPlayer.playWithPlaylist(playlist, selectTrackIndex: selectedIndex) {
+                if !LocalMusicPlayer.sharedPlayer.playWithPlaylist(playlist: playlist, selectTrackIndex: selectedIndex) {
                     return
                 }
             }
         } else {
             if let correction = self.currentCollection() {
-                if !LocalMusicPlayer.sharedPlayer.playWithCollection(correction, selectTrackIndex: selectedIndex, type: self.sourceType) {
+                if !LocalMusicPlayer.sharedPlayer.playWithCollection(collection: correction, selectTrackIndex: selectedIndex, type: self.sourceType) {
                     return
                 }
             }
         }
-        self.presentViewController(PlayerViewController(nibName: "PlayerViewController", bundle:nil),
+        self.present(PlayerViewController(nibName: "PlayerViewController", bundle:nil),
             animated: true,
             completion: nil)
    }

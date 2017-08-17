@@ -15,25 +15,25 @@ class ArtistViewController: BaseViewController {
     @IBOutlet weak var tableView: UITableView!
     
     // MARK: - Private property
-    private var artists: [MPMediaItemCollection] = []
+    fileprivate var artists: [MPMediaItemCollection] = []
     
     // MARK: - Override methods
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Load artists
-        let query = MPMediaQuery.artistsQuery()
+        let query = MPMediaQuery.artists()
         // Only Media type music
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.music.rawValue, forProperty: MPMediaItemPropertyMediaType))
         // Include iCloud item
-        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
+        query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(value: false), forProperty: MPMediaItemPropertyIsCloudItem))
 
         if let collections = query.collections {
             self.artists = collections
         }
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         self.updateCells()
@@ -42,12 +42,12 @@ class ArtistViewController: BaseViewController {
     override func updateCells() {
         for cell in self.tableView.visibleCells {
             if let artistCell = cell as? ArtistCell {
-                if let indexPath = self.tableView.indexPathForCell(artistCell) {
+                if let indexPath = self.tableView.indexPath(for: artistCell) {
                     let artist = self.artists[indexPath.row]
-                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(artist) {
+                    if LocalMusicPlayer.sharedPlayer.isCurrentCollection(collection: artist) {
                         artistCell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
                     } else {
-                        artistCell.contentView.backgroundColor = UIColor.clearColor()
+                        artistCell.contentView.backgroundColor = UIColor.clear
                     }
                 }
             }
@@ -58,23 +58,23 @@ class ArtistViewController: BaseViewController {
 // MARK: - UITableViewDataSource
 extension ArtistViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.artists.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let artist = self.artists[indexPath.row]
-        let cell = self.tableView.dequeueReusableCellWithIdentifier("ArtistCell", forIndexPath: indexPath) as! ArtistCell
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "ArtistCell", for: indexPath) as! ArtistCell
         
         if let representativeItem = artist.representativeItem {
             cell.artistNameLabel.text = representativeItem.artist
         }
         cell.trackCountLabel.text = "  \(artist.count) track(s)"
         
-        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(artist) {
+        if LocalMusicPlayer.sharedPlayer.isCurrentCollection(collection: artist) {
             cell.contentView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.2)
         } else {
-            cell.contentView.backgroundColor = UIColor.clearColor()
+            cell.contentView.backgroundColor = UIColor.clear
         }
 
         return cell
@@ -84,8 +84,8 @@ extension ArtistViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension ArtistViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath as IndexPath, animated: true)
         
         if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
             tracksViewController.collection = self.artists[indexPath.row]

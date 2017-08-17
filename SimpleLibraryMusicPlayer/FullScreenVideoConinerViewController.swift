@@ -23,22 +23,22 @@ class FullScreenVideoConinerViewController: UIViewController {
     weak var delegate: FullScreenVideoConinerViewControllerDelegate?
     var avPlayerView: AVPlayerView?
     
-    private var timer: NSTimer?
+    private var timer: Timer?
 
     // MARK: - Override methods
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: .Fade)
+        UIApplication.shared.setStatusBarHidden(true, with: .fade)
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
         self.setVideoControllerHiddenTimer()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         if self.timer != nil {
@@ -49,12 +49,12 @@ class FullScreenVideoConinerViewController: UIViewController {
     
     // MARK: - Internal method
     func setVideoView(avPlayerView: AVPlayerView) {
-        avPlayerView.frame = CGRect(origin: CGPointZero, size: self.view.frame.size)
-        avPlayerView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        avPlayerView.frame = CGRect(origin: CGPoint.zero, size: self.view.frame.size)
+        avPlayerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.view.addSubview(avPlayerView)
-        self.view.bringSubviewToFront(self.videoControllerView)
+        self.view.bringSubview(toFront: self.videoControllerView)
         
-        avPlayerView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "tapVideoView"))
+        avPlayerView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(FullScreenVideoConinerViewController.tapVideoView)))
 
         self.avPlayerView = avPlayerView
     }
@@ -72,7 +72,7 @@ class FullScreenVideoConinerViewController: UIViewController {
 
     func tapVideoView() {
         let alpha: CGFloat = self.videoControllerView.alpha == 1 ? 0 : 1
-        UIView.animateWithDuration(0.25) { () -> Void in
+        UIView.animate(withDuration: 0.25) { () -> Void in
             self.videoControllerView.alpha = alpha
         }
         if alpha == 1 {
@@ -84,7 +84,7 @@ class FullScreenVideoConinerViewController: UIViewController {
         if self.videoControllerView.alpha == 0 {
             return
         }
-        UIView.animateWithDuration(0.25) { () -> Void in
+        UIView.animate(withDuration: 0.25) { () -> Void in
             self.videoControllerView.alpha = 0
         }
     }
@@ -96,7 +96,7 @@ class FullScreenVideoConinerViewController: UIViewController {
             self.tapVideoView()
         }
         
-        self.delegate?.closeFullScreen(self)
+        self.delegate?.closeFullScreen(fullScreenVideoConinerViewController: self)
     }
     
     // MARK: - Private
@@ -105,13 +105,13 @@ class FullScreenVideoConinerViewController: UIViewController {
            self.timer?.invalidate()
         }
         
-        self.timer = NSTimer(timeInterval: 5,
+        self.timer = Timer(timeInterval: 5,
             target: self,
-            selector: "videoControllerHidden",
+            selector: #selector(FullScreenVideoConinerViewController.videoControllerHidden),
             userInfo: nil,
             repeats: false)
         if let timer = self.timer {
-            NSRunLoop.mainRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
+            RunLoop.main.add(timer, forMode:RunLoopMode.commonModes)
         }
     }
 }

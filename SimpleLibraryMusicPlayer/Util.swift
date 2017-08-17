@@ -12,15 +12,15 @@ import AVFoundation
 
 class Util: NSObject {
 
-    class func timeString(secondTimes: NSTimeInterval?) -> String {
+    class func timeString(secondTimes: TimeInterval?) -> String {
         
         if let unwrappedTime = secondTimes {
-            if isnan(unwrappedTime) {
+            if unwrappedTime.isNaN {
                 return "00:00"
             }
             
             let min = Int(unwrappedTime / 60)
-            let sec = Int(unwrappedTime % 60)
+            let sec = Int(unwrappedTime) % 60
             
             return ((min < 10) ? "0" : "") + "\(min)" + ":" + ((sec < 10) ? "0" : "") + "\(sec)"
         } else {

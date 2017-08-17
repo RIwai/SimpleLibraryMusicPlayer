@@ -42,11 +42,11 @@ enum SelectType: Int {
                 return UIStoryboard(name: "ArtistViewController", bundle: nil).instantiateInitialViewController()
             case .Track:
                 if let tracksViewController = UIStoryboard(name: "TracksViewController", bundle: nil).instantiateInitialViewController() as? TracksViewController {
-                    let query = MPMediaQuery.songsQuery()
+                    let query = MPMediaQuery.songs()
                     // Only Media type music
-                    query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.Music.rawValue, forProperty: MPMediaItemPropertyMediaType))
+                    query.addFilterPredicate(MPMediaPropertyPredicate(value: MPMediaType.music.rawValue, forProperty: MPMediaItemPropertyMediaType))
                     // Include iCloud item
-                    query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(bool: false), forProperty: MPMediaItemPropertyIsCloudItem))
+                    query.addFilterPredicate(MPMediaPropertyPredicate(value: NSNumber(value: false), forProperty: MPMediaItemPropertyIsCloudItem))
                     tracksViewController.collection = MPMediaItemCollection(items: query.items ?? [])
                     tracksViewController.sourceType = .Track
                     
@@ -75,12 +75,12 @@ class SelectViewController: BaseViewController {
 // MARK: - UITableViewDataSource
 extension SelectViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return SelectType.Count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCellWithIdentifier("NormalCell", forIndexPath: indexPath)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "NormalCell", for: indexPath)
         
         cell.textLabel?.text = SelectType(rawValue: indexPath.row)?.title ?? ""
         
@@ -91,8 +91,8 @@ extension SelectViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension SelectViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath as IndexPath, animated: true)
         
         if let viewController = SelectType(rawValue: indexPath.row)?.transitionsViewController {
             viewController.title = SelectType(rawValue: indexPath.row)?.title ?? ""

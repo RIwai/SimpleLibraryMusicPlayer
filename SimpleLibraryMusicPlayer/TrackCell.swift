@@ -21,7 +21,7 @@ class TrackCell: UITableViewCell {
         super.awakeFromNib()
         
         self.artworkImageView.layer.borderWidth = 0.5
-        self.artworkImageView.layer.borderColor = UIColor.lightGrayColor().CGColor
+        self.artworkImageView.layer.borderColor = UIColor.lightGray.cgColor
         self.artworkImageView.layer.cornerRadius = 2.0
         self.artworkImageView.clipsToBounds = true
     }
