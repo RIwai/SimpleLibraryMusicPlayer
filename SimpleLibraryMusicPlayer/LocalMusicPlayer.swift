@@ -67,9 +67,15 @@ class LocalMusicPlayer: NSObject {
         
         // Setup for background
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-        } catch {
-            // Do nothing
+            if #available(iOS 11.0, *) {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback,
+                                                                mode: AVAudioSessionModeDefault,
+                                                                routeSharingPolicy: .longForm)
+            }  else {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+            }
+        } catch let error {
+            print("setCategory error = \(error)")
         }
         
         // Add Remote Command
@@ -91,7 +97,7 @@ class LocalMusicPlayer: NSObject {
     
     deinit {
         self.removePlayer()
-        
+
         NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.UIApplicationDidEnterBackground.rawValue, object: nil)
         NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.AVAudioSessionInterruption.rawValue, object: nil)
         NotificationCenter.removeObserver(observer: self, name: NSNotification.Name.AVAudioSessionRouteChange.rawValue, object: nil)
@@ -107,8 +113,8 @@ class LocalMusicPlayer: NSObject {
             
             do {
                 try AVAudioSession.sharedInstance().setActive(true)
-            } catch {
-                // Do nothing
+            } catch let error {
+                print("setActive error = \(error)")
             }
             
             self.player().play()
@@ -116,6 +122,7 @@ class LocalMusicPlayer: NSObject {
             NotificationCenter.postNotificationEvent(event: .localMusicStarted, object: self)
             
             self.playbackInfoToNowPlayingInfoCenter()
+            MPNowPlayingInfoCenter.default().playbackState = .paused
         } else {
             self.watitingForPlay = true
         }
@@ -179,12 +186,13 @@ class LocalMusicPlayer: NSObject {
         NotificationCenter.postNotificationEvent(event: .localMusicPaused, object: self)
         
         self.playbackInfoToNowPlayingInfoCenter()
+        MPNowPlayingInfoCenter.default().playbackState = .paused
         
         DispatchQueue.global().async {
             do {
                 try AVAudioSession.sharedInstance().setActive(false)
-            } catch {
-                // Do nothing
+            } catch let error {
+                print("setActive error = \(error)")
             }
         }
     }
@@ -287,7 +295,7 @@ class LocalMusicPlayer: NSObject {
         if self.remoteSeekTimer == nil {
             self.remoteSeekTimer = Timer.scheduledTimer(timeInterval: 0.2,
                 target: self,
-                selector: Selector(("remoteSeek:")),
+                selector: #selector(LocalMusicPlayer.remoteSeek),
                 userInfo: ["Forward": forward],
                 repeats: true)
             
@@ -303,7 +311,7 @@ class LocalMusicPlayer: NSObject {
         }
     }
     
-    func remoteSeek(timer: Timer) {
+    @objc func remoteSeek(timer: Timer) {
         if let useInfo = timer.userInfo as? [String: Any],
             let isForward = useInfo["Forward"] as? Bool {
 
@@ -701,22 +709,34 @@ class LocalMusicPlayer: NSObject {
     
     // MARK: - For MPNowPlayingInfoCenter
     @objc func playbackInfoToNowPlayingInfoCenter() {
-        guard let mediaItem = self.currentTrack() else { return }
-        var playingInfo: [String: Any] = [
-            MPMediaItemPropertyTitle: mediaItem.title ?? "",
-            MPMediaItemPropertyArtist: mediaItem.artist ?? "",
-            MPMediaItemPropertyAlbumTitle: mediaItem.albumTitle ?? "",
-            MPMediaItemPropertyPlaybackDuration: self.currentTrackPlaybackDuration(),
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: self.currentTime(),
-            MPNowPlayingInfoPropertyPlaybackRate: self.player().rate]
-        if mediaItem.artwork != nil {
-            playingInfo[MPMediaItemPropertyArtwork] = mediaItem.artwork
+        DispatchQueue.main.async {
+            guard let mediaItem = self.currentTrack() else { return }
+            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+            nowPlayingInfo[MPMediaItemPropertyTitle] = mediaItem.title ?? ""
+            nowPlayingInfo[MPMediaItemPropertyArtist] = mediaItem.artist ?? ""
+            nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = mediaItem.albumTitle ?? ""
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = self.currentTrackPlaybackDuration()
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime()
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.player().rate
+            if #available(iOS 10.0, *) {
+                nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = self.isVideoType(item: mediaItem) ? MPNowPlayingInfoMediaType.video.rawValue : MPNowPlayingInfoMediaType.audio.rawValue
+            }
+            if #available(iOS 10.3, *) {
+                nowPlayingInfo[MPNowPlayingInfoPropertyAssetURL] = mediaItem.assetURL
+            }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = mediaItem.artwork
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+            
+            MPNowPlayingInfoCenter.default().playbackState = self.isPlaying ? .playing : .paused
         }
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = playingInfo
     }
     
+    
     private func updatePlaybackTimeToNowPlayingInfoCenter() {
-        if self.currentTrack() != nil {
+        if self.currentTrack() == nil {
+            return
+        }
+        DispatchQueue.main.async {
             if var playingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo {
                 playingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime()
                 MPNowPlayingInfoCenter.default().nowPlayingInfo = playingInfo
@@ -769,15 +789,21 @@ class LocalMusicPlayer: NSObject {
         MPRemoteCommandCenter.shared().previousTrackCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandPrevious))
         MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandseekForward))
         MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandseekBackward))
+        
+        if #available(iOS 9.1, *) {
+            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(LocalMusicPlayer.remoteCommandChangePlaybackPosition))
+        }
     }
     
     // MARK: - Remote Command Handler
     @objc func remoteCommandPlay() {
         self.play()
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandPause() {
         self.pause()
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandPlayOrPause() {
@@ -786,26 +812,41 @@ class LocalMusicPlayer: NSObject {
         } else {
             self.play()
         }
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandStop() {
         self.pause()
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandNext() {
         self.skipToNext()
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandPrevious() {
         self.skipToPrevisu()
+        self.playbackInfoToNowPlayingInfoCenter()
     }
 
     @objc func remoteCommandseekForward(event: MPSeekCommandEvent) {
         self.seekForward(begin: event.type == .beginSeeking)
+        self.playbackInfoToNowPlayingInfoCenter()
     }
     
     @objc func remoteCommandseekBackward(event: MPSeekCommandEvent) {
         self.seekBackward(begin: event.type == .beginSeeking)
+        self.playbackInfoToNowPlayingInfoCenter()
+    }
+    
+    @available(iOS 9.0, *)
+    @objc func remoteCommandChangePlaybackPosition(event: MPChangePlaybackPositionCommandEvent) -> MPRemoteCommandHandlerStatus {
+        self.seekToTime(targetTime: event.positionTime) {
+            self.playbackInfoToNowPlayingInfoCenter()
+        }
+
+        return MPRemoteCommandHandlerStatus.success
     }
     
     // MARK: - For Background task

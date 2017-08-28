@@ -24,6 +24,7 @@
                 <outlet property="playbackDurationTimeLabel" destination="Gtl-HK-Hcv" id="Kjt-NM-MiT"/>
                 <outlet property="prevButton" destination="fdS-61-vzp" id="zSq-l8-xAR"/>
                 <outlet property="repeatSwitch" destination="3Ue-Sf-f6l" id="NYJ-OK-VuK"/>
+                <outlet property="routePickerContinerView" destination="Vn7-fC-JvF" id="bTu-6T-pVG"/>
                 <outlet property="seekSlider" destination="es9-U8-Dn6" id="9Cc-5c-6dH"/>
                 <outlet property="shuffleSwitch" destination="9gc-c5-7Yx" id="Rwx-bP-fzY"/>
                 <outlet property="skipButton" destination="uyy-oS-2qs" id="KCY-Sr-l80"/>
@@ -246,6 +247,14 @@
                         <constraint firstAttribute="bottom" secondItem="Pfy-QC-zK2" secondAttribute="bottom" id="Vbj-pB-rqV"/>
                     </constraints>
                 </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vn7-fC-JvF">
+                    <rect key="frame" x="272.5" y="577" width="24" height="24"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="24" id="Xec-rW-eiC"/>
+                        <constraint firstAttribute="width" constant="24" id="zad-aO-coH"/>
+                    </constraints>
+                </view>
             </subviews>
             <color key="backgroundColor" red="0.98039215686274506" green="0.98431372549019602" blue="0.9882352941176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
@@ -268,6 +277,7 @@
                 <constraint firstItem="4rP-yR-ezD" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="IxH-Hc-ppc"/>
                 <constraint firstItem="9gc-c5-7Yx" firstAttribute="top" secondItem="hhs-am-4xw" secondAttribute="bottom" constant="4" id="KbE-lF-QuL"/>
                 <constraint firstItem="UKx-aY-b6Q" firstAttribute="height" secondItem="ErN-cm-JyV" secondAttribute="height" id="LEm-F5-qF2"/>
+                <constraint firstItem="uyy-oS-2qs" firstAttribute="top" secondItem="Vn7-fC-JvF" secondAttribute="bottom" constant="8" id="QDm-bO-DAc"/>
                 <constraint firstAttribute="bottom" secondItem="fdS-61-vzp" secondAttribute="bottom" constant="18" id="S9G-4u-Jqx"/>
                 <constraint firstItem="gWZ-Hk-3eI" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="30" id="SLb-bY-PPh"/>
                 <constraint firstAttribute="bottom" secondItem="9gc-c5-7Yx" secondAttribute="bottom" constant="18" id="V7Z-Mf-4yl"/>
@@ -280,6 +290,7 @@
                 <constraint firstItem="KWN-8E-nZ0" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="aJy-Kd-NGi"/>
                 <constraint firstItem="oAD-42-1gc" firstAttribute="leading" secondItem="Fcx-6c-tNs" secondAttribute="trailing" id="bV9-O1-JGj"/>
                 <constraint firstItem="fLr-cW-44s" firstAttribute="leading" secondItem="fdS-61-vzp" secondAttribute="trailing" constant="12" id="cjM-SK-NVC"/>
+                <constraint firstItem="Vn7-fC-JvF" firstAttribute="leading" secondItem="oAD-42-1gc" secondAttribute="trailing" constant="80" id="eAn-w7-9oP"/>
                 <constraint firstAttribute="centerX" secondItem="oAD-42-1gc" secondAttribute="centerX" priority="750" id="h10-ff-dhM"/>
                 <constraint firstItem="3Ue-Sf-f6l" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="j9k-La-Rb4"/>
                 <constraint firstItem="Brc-cl-RPh" firstAttribute="top" secondItem="05t-hk-LfW" secondAttribute="bottom" constant="8" id="jef-Jz-6eR"/>
@@ -297,6 +308,7 @@
                 <constraint firstAttribute="trailing" secondItem="05t-hk-LfW" secondAttribute="trailing" constant="8" id="w2g-1i-cjX"/>
                 <constraint firstAttribute="trailing" secondItem="uQ9-A4-YVC" secondAttribute="trailing" constant="8" id="xKu-BC-dgO"/>
             </constraints>
+            <point key="canvasLocation" x="33.5" y="53.5"/>
         </view>
     </objects>
     <resources>

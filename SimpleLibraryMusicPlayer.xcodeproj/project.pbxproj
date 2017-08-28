@@ -94,6 +94,7 @@
 			children = (
 				CA07E43C1B8165BC00FB25B4 /* SimpleLibraryMusicPlayer */,
 				CA07E43B1B8165BC00FB25B4 /* Products */,
+				EFE185491F46C94E00DF2B0E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,6 +154,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		EFE185491F46C94E00DF2B0E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -190,6 +198,9 @@
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
+							};
+							com.apple.InterAppAudio = {
+								enabled = 0;
 							};
 						};
 					};

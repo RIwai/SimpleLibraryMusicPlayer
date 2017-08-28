@@ -9,6 +9,7 @@
 import UIKit
 import MediaPlayer
 import AVFoundation
+import AVKit
 
 class PlayerViewController: UIViewController {
 
@@ -29,6 +30,25 @@ class PlayerViewController: UIViewController {
     @IBOutlet weak var repeatSwitch: UISwitch!
     @IBOutlet weak var seekSlider: UISlider!
     @IBOutlet weak var lylicsTextView: UITextView!
+    @IBOutlet weak var routePickerContinerView: UIView! {
+        didSet {
+            if #available(iOS 11, *) {
+                let picker = AVRoutePickerView()
+                picker.frame.size = self.routePickerContinerView.frame.size
+                picker.activeTintColor = UIColor.red
+                self.routePickerContinerView.addSubview(picker)
+            } else {
+                let volumeView = MPVolumeView()
+                volumeView.frame.size = self.routePickerContinerView.frame.size
+                volumeView.showsVolumeSlider = false
+                volumeView.showsRouteButton = true
+                volumeView.backgroundColor = UIColor.lightGray
+                self.routePickerContinerView.addSubview(volumeView)
+                self.routePickerContinerView.layer.cornerRadius = self.routePickerContinerView.frame.size.width / 2
+                self.routePickerContinerView.clipsToBounds = true
+            }
+        }
+    }
     
     // MARK: Private property
     private var timer: Timer? = nil
@@ -167,6 +187,10 @@ class PlayerViewController: UIViewController {
         self.videoToFullScreen(isLandscapeLeft: true)
     }
 
+    @IBAction func tapAirPlayButton(_ sender: Any) {
+
+    }
+    
     // MARK: - Gesture handler
     func seekForward(longPressGestureRecognizer: UILongPressGestureRecognizer) {
         switch longPressGestureRecognizer.state {
